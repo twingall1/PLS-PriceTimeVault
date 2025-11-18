@@ -175,16 +175,48 @@
 
       </div>
     </div>
-
+  <!-- RIGHT COLUMN -->
     <div class="col">
       <div class="card">
-        <h2>Global Price Feed</h2>
+
+        <h2>Global Price Feed (PulseX V1 WPLS/DAI)</h2>
+
+        <div class="small" style="margin-bottom:6px;">
+          Source: PulseX <b>V1</b> WPLS/DAI liquidity pool<br>
+          Pair address:
+        </div>
+
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;width:100%;max-width:420px;">
+          <input class="mono"
+                 value="0xe56043671df55de5cdf8459710433c10324de0ae"
+                 readonly
+                 style="
+                   background:#ffffff;
+                   color:#000000;
+                   border:1px solid #ccd8e0;
+                   width:100%;
+                   padding:4px;
+                   border-radius:6px;
+                 " />
+
+          <div class="copy-icon-btn" onclick="copyAddr('0xe56043671df55de5cdf8459710433c10324de0ae')">
+            <svg viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
+                       0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                       2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
+                       16H8V7h11v14z"/>
+            </svg>
+          </div>
+        </div>
+
         <div id="globalPrice"></div>
         <div id="globalPriceRaw" class="small"></div>
+
       </div>
     </div>
   </div>
-
+  
+  <!-- ADD VAULT MANUALLY -->
   <div class="card">
     <h2>Add Vault Address Manually</h2>
     <input id="manualVaultInput" type="text" placeholder="0x..." style="width:70%;" />
