@@ -6,20 +6,18 @@ if (!window.ethers) {
 }
 const ethers = window.ethers;
 
-// ---------------------------
-// CONTRACT ADDRESSES
-// ---------------------------
-// TODO: after deploying PLSVaultFactoryV2, set the factory address here:
-const FACTORY_ADDRESS = "0x55cf712BD60Ffd31bDBfeC6831238Bd726BE48cC".toLowerCase();
+// ------------------------------
+// CONTRACT ADDRESSES (lowercase)
+// ------------------------------
+const FACTORY_ADDRESS = "0xyour_factory_address_here".toLowerCase(); 
 
-// PulseChain mainnet WPLS, DAI, and WPLS/DAI V1 pair (all lowercased)
 const WPLS_ADDRESS = "0xa1077a294dde1b09bb078844df40758a5d0f9a27".toLowerCase();
 const DAI_ADDRESS  = "0xefd766ccb38eaf1dfd701853bfce31359239f305".toLowerCase();
 const PAIR_ADDRESS = "0xe56043671df55de5cdf8459710433c10324de0ae".toLowerCase();
 
-// ---------------------------
+// ------------------------------
 // ABIs
-// ---------------------------
+// ------------------------------
 const factoryAbi = [
   "event VaultCreated(address indexed owner, address vault, uint256 priceThreshold1e18, uint256 unlockTime)",
   "function createVault(uint256 priceThreshold1e18, uint256 unlockTime) external returns (address)"
@@ -36,23 +34,23 @@ const vaultAbi = [
 ];
 
 const pairAbi = [
-  "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
   "function token0() view returns (address)",
-  "function token1() view returns (address)"
+  "function token1() view returns (address)",
+  "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"
 ];
 
-// ---------------------------
+// ------------------------------
 // STATE
-// ---------------------------
+// ------------------------------
 let walletProvider, signer, userAddress;
 let factory, pairContract;
 let locks = [];
 let countdownInterval;
 let pairToken0IsWPLS = true;
 
-// ---------------------------
+// ------------------------------
 // UI ELEMENTS
-// ---------------------------
+// ------------------------------
 const connectBtn          = document.getElementById("connectBtn");
 const walletSpan          = document.getElementById("walletAddress");
 const networkInfo         = document.getElementById("networkInfo");
@@ -68,9 +66,9 @@ const manualVaultInput    = document.getElementById("manualVaultInput");
 const addVaultBtn         = document.getElementById("addVaultBtn");
 const manualAddStatus     = document.getElementById("manualAddStatus");
 
-// ---------------------------
+// ------------------------------
 // CONNECT WALLET
-// ---------------------------
+// ------------------------------
 async function connect() {
   try {
     walletProvider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -85,7 +83,7 @@ async function connect() {
     factory      = new ethers.Contract(FACTORY_ADDRESS, factoryAbi, signer);
     pairContract = new ethers.Contract(PAIR_ADDRESS, pairAbi, walletProvider);
 
-    await initPairOrdering();
+    await detectPairTokenOrdering();
     await refreshGlobalPrice();
     await loadLocalVaults();
 
@@ -102,28 +100,23 @@ async function connect() {
 
 connectBtn.addEventListener("click", connect);
 
-// Determine whether token0 is WPLS for price display logic
-async function initPairOrdering() {
+// Determine liquidity pair ordering (token0 == WPLS?)
+async function detectPairTokenOrdering() {
   try {
     const token0 = (await pairContract.token0()).toLowerCase();
     pairToken0IsWPLS = (token0 === WPLS_ADDRESS);
   } catch (err) {
-    console.error("Pair ordering error:", err);
-    pairToken0IsWPLS = true; // fallback assumption
+    console.error("Pair read failed:", err);
+    pairToken0IsWPLS = true;
   }
 }
 
-// ---------------------------
+// ------------------------------
 // GLOBAL PRICE FEED
-// ---------------------------
+// ------------------------------
 async function refreshGlobalPrice() {
   try {
     const [r0, r1] = await pairContract.getReserves();
-    if (r0 === 0 && r1 === 0) {
-      globalPriceDiv.textContent = "No liquidity.";
-      globalPriceRawDiv.textContent = "";
-      return;
-    }
 
     let wplsRes, daiRes;
     if (pairToken0IsWPLS) {
@@ -134,29 +127,35 @@ async function refreshGlobalPrice() {
       daiRes  = r0;
     }
 
-    const price1e18 = daiRes.mul(ethers.constants.WeiPerEther).div(wplsRes);
-    const priceFloat = parseFloat(ethers.utils.formatUnits(price1e18, 18));
+    if (wplsRes.eq(0) || daiRes.eq(0)) {
+      globalPriceDiv.textContent = "No liquidity.";
+      return;
+    }
 
-    globalPriceDiv.textContent = `1 PLS ≈ ${priceFloat.toFixed(6)} DAI`;
-    globalPriceRawDiv.textContent = `raw 1e18: ${price1e18.toString()}`;
+    const price = daiRes.mul(ethers.constants.WeiPerEther).div(wplsRes);
+    const float = parseFloat(ethers.utils.formatUnits(price, 18));
+
+    globalPriceDiv.textContent = `1 PLS ≈ ${float.toFixed(6)} DAI`;
+    globalPriceRawDiv.textContent = `raw 1e18: ${price.toString()}`;
   } catch (err) {
-    console.error("Global price error:", err);
     globalPriceDiv.textContent = "Price error.";
+    console.error(err);
   }
 }
 
 setInterval(refreshGlobalPrice, 15000);
 
-// ---------------------------
-// LOCAL VAULT STORAGE
-// ---------------------------
+// ------------------------------
+// LOCAL STORAGE UTILS
+// ------------------------------
 function localKey() {
   return "pls-vaults-" + userAddress;
 }
 
 function getLocalVaults() {
   if (!userAddress) return [];
-  return JSON.parse(localStorage.getItem(localKey()) || "[]");
+  const list = JSON.parse(localStorage.getItem(localKey()) || "[]");
+  return list.map(v => ({ ...v, address: v.address.toLowerCase() }));
 }
 
 function saveLocalVault(vaultAddr, threshold, unlockTime) {
@@ -172,31 +171,41 @@ function saveLocalVault(vaultAddr, threshold, unlockTime) {
   }
 }
 
-// ---------------------------
-// MANUAL ADD VAULT
-// ---------------------------
+// REMOVE vault entry from list
+function removeVault(addr) {
+  const key = localKey();
+  let list = getLocalVaults();
+  list = list.filter(v => v.address !== addr.toLowerCase());
+  localStorage.setItem(key, JSON.stringify(list));
+  loadLocalVaults();
+}
+
+// ------------------------------
+// MANUAL ADD
+// ------------------------------
 addVaultBtn.addEventListener("click", async () => {
   if (!userAddress) {
     manualAddStatus.textContent = "Connect wallet first.";
     return;
   }
+
   const addr = manualVaultInput.value.trim().toLowerCase();
   if (!ethers.utils.isAddress(addr)) {
-    manualAddStatus.textContent = "Invalid address.";
+    manualAddStatus.textContent = "Invalid vault address.";
     return;
   }
+
   saveLocalVault(addr, null, null);
   manualAddStatus.textContent = "Vault added.";
   manualVaultInput.value = "";
   await loadLocalVaults();
 });
 
-// ---------------------------
+// ------------------------------
 // CREATE VAULT
-// ---------------------------
+// ------------------------------
 createForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   if (!signer) {
     alert("Connect wallet first.");
     return;
@@ -211,18 +220,15 @@ createForm.addEventListener("submit", async (e) => {
 
     const dtISO = unlockDateTimeInput.value.trim();
     const ts = Date.parse(dtISO);
+    if (isNaN(ts)) throw new Error("Invalid datetime");
     const unlockTime = Math.floor(ts / 1000);
-    if (isNaN(unlockTime)) {
-      alert("Invalid datetime.");
-      throw new Error("Invalid datetime.");
-    }
 
-    // Optional: preview callStatic to get vault address
     const tx = await factory.createVault(threshold1e18, unlockTime);
     const receipt = await tx.wait();
 
     const iface = new ethers.utils.Interface(factoryAbi);
     let vaultAddr = null;
+
     for (const log of receipt.logs) {
       try {
         const parsed = iface.parseLog(log);
@@ -234,7 +240,7 @@ createForm.addEventListener("submit", async (e) => {
     }
 
     if (!vaultAddr) {
-      createStatus.textContent = "Vault created, but address not parsed.";
+      createStatus.textContent = "Vault created but log not parsed.";
       return;
     }
 
@@ -244,21 +250,17 @@ createForm.addEventListener("submit", async (e) => {
 
     await loadLocalVaults();
   } catch (err) {
-    console.error(err);
     createStatus.textContent = "Error: " + err.message;
+    console.error(err);
   } finally {
     createBtn.disabled = false;
   }
 });
 
-// ---------------------------
+// ------------------------------
 // LOAD LOCAL VAULTS
-// ---------------------------
+// ------------------------------
 async function loadLocalVaults() {
-  if (!userAddress) {
-    locksContainer.textContent = "Connect wallet to load locks.";
-    return;
-  }
   locks = [];
   const list = getLocalVaults();
 
@@ -281,9 +283,9 @@ async function loadLocalVaults() {
   renderLocks();
 }
 
-// ---------------------------
+// ------------------------------
 // LOAD VAULT DETAILS
-// ---------------------------
+// ------------------------------
 async function loadVaultDetails(lock) {
   try {
     const vault = new ethers.Contract(lock.address, vaultAbi, walletProvider);
@@ -310,14 +312,15 @@ async function loadVaultDetails(lock) {
     lock.balance      = balance;
     lock.threshold    = thresholdOnChain;
     lock.unlockTime   = unlockTimeOnChain.toNumber();
+
   } catch (err) {
     console.error("Vault load error:", lock.address, err);
   }
 }
 
-// ---------------------------
-// RENDER LOCKS
-// ---------------------------
+// ------------------------------
+// RENDER VAULT CARDS
+// ------------------------------
 function renderLocks() {
   if (!locks.length) {
     locksContainer.textContent = "No locks found.";
@@ -349,18 +352,24 @@ function renderLocks() {
         <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
         <div><strong>Countdown:</strong> ${countdown}</div>
         <div><strong>Locked:</strong> ${bal.toFixed(4)} PLS</div>
+
         <button onclick="withdrawVault('${lock.address}')"
           ${(!lock.canWithdraw || lock.withdrawn) ? "disabled" : ""}>
           Withdraw
+        </button>
+
+        <button onclick="removeVault('${lock.address}')"
+          style="margin-left:10px;background:#b91c1c;">
+          Remove
         </button>
       </div>
     `;
   }).join("");
 }
 
-// ---------------------------
+// ------------------------------
 // WITHDRAW
-// ---------------------------
+// ------------------------------
 async function withdrawVault(addr) {
   try {
     const vault = new ethers.Contract(addr, vaultAbi, signer);
@@ -373,9 +382,9 @@ async function withdrawVault(addr) {
   }
 }
 
-// ---------------------------
+// ------------------------------
 // UTILITIES
-// ---------------------------
+// ------------------------------
 function formatTimestamp(ts) {
   return new Date(ts * 1000).toLocaleString();
 }
