@@ -6,95 +6,129 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
+    /* ----- GLOBAL LIGHT THEME ----- */
     body {
       font-family: system-ui, sans-serif;
-      background: #1a0a00; /* lava */
-      color: #ffe9c4;      /* warm gold */
+      background: #f5faff; /* very pale blue */
+      color: #1a1a1a;      /* dark text */
       margin: 0;
       padding: 16px;
     }
 
-    h1, h2 { margin-top: 0; color: #ffcc66; }
-
-    .card {
-      background: #2b0f00;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 6px 20px rgba(255,120,50,0.12);
-      border: 1px solid rgba(255,180,80,0.25);
+    h1, h2 { 
+      margin-top: 0;
+      color: #003366; /* deep blue */
     }
 
-    .row { display: flex; flex-wrap: wrap; gap: 16px; }
-    .col { flex: 1 1 280px; }
+    /* ----- CARDS ----- */
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border: 1px solid #d7e5f4;
+    }
+
+    /* ----- LAYOUT ----- */
+    .row { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 16px; 
+    }
+    
+    .col { 
+      flex: 1 1 280px;
+    }
+
+    /* ----- INPUTS & BUTTONS ----- */
     input, button {
       padding: 8px 10px;
       border-radius: 8px;
-      border: 1px solid #ffb84d;
-      background: #3a1500;
-      color: #ffe9c4;
+      border: 1px solid #9bb9d4;
+      background: #ffffff;
+      color: #1a1a1a;
       font-size: 14px;
     }
 
-    input::placeholder { color: #ffdaa8; }
+    input::placeholder {
+      color: #7a98b8;
+    }
 
     button {
       cursor: pointer;
       border: none;
-      background: #d46a00;
-      color: black;
-      font-weight: 700;
+      background: #1f7aec; /* blue */
+      color: #ffffff;
+      font-weight: 600;
       transition: background 0.2s;
     }
 
-    button:hover { background: #ff8800; }
-    button[disabled] { opacity: .4; cursor: not-allowed; }
+    button:hover {
+      background: #0059cc;
+    }
 
-    .small { font-size: 12px; color: #ffd9a1; }
+    button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
+    .small {
+      font-size: 12px;
+      color: #4e6a85;
+    }
+
+    /* ----- STATUS TAGS ----- */
     .tag {
       display:inline-block;
       padding:2px 8px;
       border-radius:999px;
       font-size:11px;
-      background:#4d1a00;
-      border:1px solid #d46a00;
+      background:#e6eff7;
+      border:1px solid #c5d9ea;
       margin-right:6px;
       margin-top:4px;
-      color:#ffcc66;
+      color:#003366;
     }
-    .status-ok   { color:#00ff9c; }
-    .status-warn { color:#ffd54a; }
-    .status-bad  { color:#ff7373; }
 
+    .status-ok   { color:#007f3b; }
+    .status-warn { color:#b38600; }
+    .status-bad  { color:#c62828; }
+
+    /* ----- CODE / MONO TEXT ----- */
     .mono {
       font-family: Courier, monospace;
       font-size: 13px;
-      color: #ffbd6f;
+      color: #003366;
       user-select: text !important;
     }
 
-    /* vault glow */
+    /* ----- UNLOCKABLE GREEN GLOW ----- */
     .vault-card {
       transition: box-shadow .3s, border .3s;
     }
+
     .vault-unlockable {
-      box-shadow: 0 0 18px 4px rgba(0,255,140,0.55);
-      border: 1px solid #00ff9c !important;
+      box-shadow: 0 0 16px 4px rgba(0,200,120,0.35);
+      border: 1px solid #00b870 !important;
     }
 
-    /* copy button */
+    /* ----- COPY BUTTON ----- */
     .copy-btn {
-      background:#d46a00;
+      background:#1f7aec;
       border:none;
-      color:black;
+      color:white;
       padding:4px 8px;
       margin-left:6px;
       border-radius:6px;
       cursor:pointer;
       font-weight:bold;
     }
-    .copy-btn:hover { background:#ff9900; }
+
+    .copy-btn:hover {
+      background:#0059cc;
+    }
+
   </style>
 </head>
 
@@ -107,17 +141,16 @@
     <div class="small" id="networkInfo"></div>
   </div>
 
-  <div class="card" style="background:#291000;">
+  <div class="card">
     <h2>About This App</h2>
     <div class="small">
-      • Each vault is a standalone smart contract.<br>
-      • To deposit <b>PLS</b>: send PLS directly to the vault address.<br>
-      • To withdraw: click Withdraw once price/time conditions are met.<br><br>
+      • Depositing PLS: send PLS directly to the vault address.<br>
+      • Withdrawal: click once price/time conditions are met.<br><br>
 
-      <b>Price Feed:</b> WPLS/DAI PulseX V1.<br>
-      <b>Unlock Rule:</b> On-chain check at TX time.<br>
-      <b>Recovery:</b> All metadata stored on-chain — add vault by address anytime.<br>
-      <b>Data Safety:</b> Removing a vault from this UI NEVER affects your funds.
+      <b>Price feed:</b> WPLS/DAI PulseX V1 pool.<br>
+      <b>Unlock logic:</b> verified fully on-chain at the moment of withdrawal.<br>
+      <b>Recovery:</b> All vault metadata (threshold + unlock time) stored on-chain.<br>
+      <b>Tracking:</b> This UI stores vault addresses locally for your convenience — safe to delete anytime.
     </div>
   </div>
 
@@ -149,9 +182,7 @@
 
   <div class="card">
     <h2>Add Vault Address Manually</h2>
-    <div class="small">
-      Enter a vault address created earlier or on another device.
-    </div>
+    <div class="small">Paste any vault address created by your wallet.</div>
     <input id="manualVaultInput" type="text" placeholder="0x..." style="width:70%;" />
     <button id="addVaultBtn">Add Vault</button>
     <div id="manualAddStatus" class="small"></div>
@@ -159,7 +190,7 @@
 
   <div class="card">
     <h2>Your Locks</h2>
-    <div id="locksContainer" class="small">Connect wallet to load.</div>
+    <div id="locksContainer" class="small">Connect wallet to load vaults.</div>
   </div>
 
   <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
