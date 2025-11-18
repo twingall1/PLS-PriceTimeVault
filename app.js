@@ -362,14 +362,25 @@ function renderLocks() {
         <!-- Time progress bar -->
         <div style="margin-top:8px;">
           <div class="small">Time Progress</div>
-          <div style="background:#3a1500;width:100%;height:10px;border-radius:5px;
-                      overflow:hidden;border:1px solid #ffb84d;">
+        
+          <!-- BASE BAR -->
+          <div style="
+            background:#ffffff;             /* white background */
+            width:100%;
+            height:12px;
+            border-radius:6px;
+            overflow:hidden;
+            border:1px solid #000000;       /* black border */
+          ">
+        
+            <!-- FILL BAR -->
             <div style="
-              width:${progressPct}%;
+              width:${progressPct}%;        /* % filled */
               height:100%;
-              background:#ff8800;
+              background:#00aa44;           /* green fill */
               transition:width 1s linear;
             "></div>
+        
           </div>
         </div>
 
