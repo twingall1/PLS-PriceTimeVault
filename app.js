@@ -345,7 +345,11 @@ function renderLocks() {
 
     return `
       <div class="card">
-        <div class="mono">${lock.address}</div>
+        <input class="mono" 
+               value="${lock.address}" 
+               readonly
+               style="background:#3a1500;border:1px solid #ffb84d;width:100%;padding:4px;border-radius:6px;"/>
+
         ${status}
         <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
         <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
