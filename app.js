@@ -343,20 +343,29 @@ function renderLocks() {
       <div class="card vault-card ${lock.canWithdraw ? 'vault-unlockable' : ''}">
 
         <!-- Address + Copy button -->
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;width:100%;max-width:500px;">
           <input class="mono"
             value="${lock.address}"
             readonly
-            style="background:#ffffff;color:#000000;border:1px solid #ccd8e0;width:100%;padding:4px;border-radius:6px;" />
-
+            style="
+              background:#ffffff;
+              color:#000000;
+              border:1px solid #ccd8e0;
+              width:100%;
+              padding:4px;
+              border-radius:6px;
+            " />
+        
           <div class="copy-icon-btn" onclick="copyAddr('${lock.address}')">
             <svg viewBox="0 0 24 24">
-              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 
-                       1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
+                       0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                       2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
                        16H8V7h11v14z"/>
             </svg>
           </div>
         </div>
+
 
         ${status}
 
@@ -407,11 +416,8 @@ async function withdrawVault(addr) {
 // COPY ADDRESS TO CLIPBOARD
 // -----------------------------------
 function copyAddr(addr) {
-  navigator.clipboard.writeText(addr).then(() => {
-    alert("Copied: " + addr);
-  }).catch((err) => {
+  navigator.clipboard.writeText(addr).catch(err => {
     console.error("Copy failed:", err);
-    alert("Copy failed");
   });
 }
 
