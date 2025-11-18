@@ -359,30 +359,7 @@ function renderLocks() {
         <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
         <div><strong>Countdown:</strong> ${countdown}</div>
 
-        <!-- Time progress bar -->
-        <div style="margin-top:8px;">
-          <div class="small">Time Progress</div>
-        
-          <!-- BASE BAR -->
-          <div style="
-            background:#ffffff;             /* white background */
-            width:100%;
-            height:12px;
-            border-radius:6px;
-            overflow:hidden;
-            border:1px solid #000000;       /* black border */
-          ">
-        
-            <!-- FILL BAR -->
-            <div style="
-              width:${progressPct}%;        /* % filled */
-              height:100%;
-              background:#00aa44;           /* green fill */
-              transition:width 1s linear;
-            "></div>
-        
-          </div>
-        </div>
+
 
         <!-- Locked PLS -->
         <div style="margin-top:8px;">
