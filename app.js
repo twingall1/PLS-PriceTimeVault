@@ -344,7 +344,7 @@ function renderLocks() {
         : '<span class="tag status-bad">LOCKED</span>';
 
     return `
-      <div class="card">
+      <div class="card vault-card ${lock.canWithdraw ? 'vault-unlockable' : ''}">
         <input class="mono" 
                value="${lock.address}" 
                readonly
@@ -355,6 +355,17 @@ function renderLocks() {
         <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
         <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
         <div><strong>Countdown:</strong> ${countdown}</div>
+        <div style="margin-top:8px;">
+          <div class="small">Time Progress</div>
+          <div style="background:#3a1500;width:100%;height:10px;border-radius:5px;overflow:hidden;border:1px solid #ffb84d;">
+            <div style="
+              width:${(timeProgress(Math.floor(Date.now()/1000), lock.unlockTime) * 100).toFixed(2)}%;
+              height:100%;
+              background:#ff8800;
+              transition: width 1s linear;
+            "></div>
+          </div>
+        </div>
         <div><strong>Locked:</strong> ${bal.toFixed(4)} PLS</div>
 
         <button onclick="withdrawVault('${lock.address}')"
@@ -392,7 +403,13 @@ async function withdrawVault(addr) {
 function formatTimestamp(ts) {
   return new Date(ts * 1000).toLocaleString();
 }
-
+function timeProgress(now, unlockTime, thresholdTime = 0) {
+  if (now >= unlockTime) return 1;
+  const total = unlockTime - thresholdTime;
+  const done = now - thresholdTime;
+  if (total <= 0) return 1;
+  return Math.max(0, Math.min(1, done / total));
+}
 function formatCountdown(ts) {
   const now = Math.floor(Date.now() / 1000);
   let diff = ts - now;
