@@ -345,10 +345,17 @@ function renderLocks() {
 
     return `
       <div class="card vault-card ${lock.canWithdraw ? 'vault-unlockable' : ''}">
-        <input class="mono" 
-               value="${lock.address}" 
-               readonly
-               style="background:#3a1500;border:1px solid #ffb84d;width:100%;padding:4px;border-radius:6px;"/>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <input class="mono"
+            value="${lock.address}"
+            readonly
+            style="background:#3a1500;border:1px solid #ffb84d;width:100%;padding:4px;border-radius:6px;" />
+        
+          <button class="copy-btn"
+            onclick="copyAddr('${lock.address}')">
+            📋
+          </button>
+        </div>
 
         ${status}
         <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
@@ -410,6 +417,12 @@ function timeProgress(now, unlockTime, thresholdTime = 0) {
   if (total <= 0) return 1;
   return Math.max(0, Math.min(1, done / total));
 }
+function copyAddr(addr) {
+  navigator.clipboard.writeText(addr).then(() => {
+    alert("Copied: " + addr);
+  });
+}
+
 function formatCountdown(ts) {
   const now = Math.floor(Date.now() / 1000);
   let diff = ts - now;
