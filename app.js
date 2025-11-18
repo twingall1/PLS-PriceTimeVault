@@ -9,7 +9,7 @@ const ethers = window.ethers;
 // ------------------------------
 // CONTRACT ADDRESSES (lowercase)
 // ------------------------------
-const FACTORY_ADDRESS = "0xyour_factory_address_here".toLowerCase(); 
+const FACTORY_ADDRESS = "0x55cf712BD60Ffd31bDBfeC6831238Bd726BE48cC".toLowerCase(); 
 
 const WPLS_ADDRESS = "0xa1077a294dde1b09bb078844df40758a5d0f9a27".toLowerCase();
 const DAI_ADDRESS  = "0xefd766ccb38eaf1dfd701853bfce31359239f305".toLowerCase();
