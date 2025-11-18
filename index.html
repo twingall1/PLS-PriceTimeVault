@@ -6,68 +6,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    /* ----- GLOBAL LIGHT THEME ----- */
+    /* --------- CLEAN LIGHT THEME --------- */
     body {
       font-family: system-ui, sans-serif;
-      background: #f5faff; /* very pale blue */
-      color: #1a1a1a;      /* dark text */
+      background: #f5f9ff;
+      color: #1a1a1a;
       margin: 0;
       padding: 16px;
     }
 
-    h1, h2 { 
+    h1, h2 {
       margin-top: 0;
-      color: #003366; /* deep blue */
+      color: #003366;
     }
 
-    /* ----- CARDS ----- */
     .card {
       background: #ffffff;
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      border: 1px solid #d7e5f4;
+      border: 1px solid #d0e0f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    /* ----- LAYOUT ----- */
-    .row { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 16px; 
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
     }
-    
-    .col { 
+
+    .col {
       flex: 1 1 280px;
     }
 
-    /* ----- INPUTS & BUTTONS ----- */
     input, button {
       padding: 8px 10px;
       border-radius: 8px;
-      border: 1px solid #9bb9d4;
+      border: 1px solid #b2c8dd;
       background: #ffffff;
       color: #1a1a1a;
       font-size: 14px;
     }
 
-    input::placeholder {
-      color: #7a98b8;
-    }
-
     button {
       cursor: pointer;
       border: none;
-      background: #1f7aec; /* blue */
+      background: #1f7aec;
       color: #ffffff;
       font-weight: 600;
       transition: background 0.2s;
     }
-
     button:hover {
       background: #0059cc;
     }
-
     button[disabled] {
       opacity: 0.5;
       cursor: not-allowed;
@@ -75,82 +66,85 @@
 
     .small {
       font-size: 12px;
-      color: #4e6a85;
+      color: #466078;
     }
 
-    /* ----- STATUS TAGS ----- */
+    /* Status tags */
     .tag {
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:11px;
-      background:#e6eff7;
-      border:1px solid #c5d9ea;
-      margin-right:6px;
-      margin-top:4px;
-      color:#003366;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #e6eff7;
+      border: 1px solid #c6d8ea;
+      margin-right: 6px;
+      color: #003366;
+      display: inline-block;
     }
+    .status-ok { color: #007f3b; }
+    .status-warn { color: #b38600; }
+    .status-bad { color: #c62828; }
 
-    .status-ok   { color:#007f3b; }
-    .status-warn { color:#b38600; }
-    .status-bad  { color:#c62828; }
-
-    /* ----- CODE / MONO TEXT ----- */
+    /* Monospace address field */
     .mono {
       font-family: Courier, monospace;
       font-size: 13px;
-      color: #003366;
       user-select: text !important;
+      color: #003366;
     }
 
-    /* ----- UNLOCKABLE GREEN GLOW ----- */
+    /* Unlockable glow */
     .vault-card {
-      transition: box-shadow .3s, border .3s;
+      transition: box-shadow 0.3s, border 0.3s;
     }
-
     .vault-unlockable {
-      box-shadow: 0 0 16px 4px rgba(0,200,120,0.35);
+      box-shadow: 0 0 16px 3px rgba(0,200,120,0.35);
       border: 1px solid #00b870 !important;
     }
 
-    /* ----- COPY BUTTON ----- */
-    .copy-btn {
-      background:#1f7aec;
-      border:none;
-      color:white;
-      padding:4px 8px;
-      margin-left:6px;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:bold;
+    /* Copy-icon button */
+    .copy-icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: #1f7aec;
+      cursor: pointer;
     }
-
-    .copy-btn:hover {
-      background:#0059cc;
+    .copy-icon-btn:hover {
+      background: #0059cc;
+    }
+    .copy-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
     }
 
   </style>
 </head>
 
 <body>
+
   <h1>PLS Price + Time Lock</h1>
 
   <div class="card">
     <button id="connectBtn">Connect Wallet</button>
     <span id="walletAddress" class="mono"></span>
-    <div class="small" id="networkInfo"></div>
+    <div id="networkInfo" class="small"></div>
   </div>
 
   <div class="card">
     <h2>About This App</h2>
     <div class="small">
-      • Depositing PLS: send PLS directly to the vault address.<br>
-      • Withdrawal: click once price/time conditions are met.<br><br>
+      • Deposit PLS by sending it directly to the vault address.<br>
+      • Withdraw when price OR backup time conditions are satisfied.<br><br>
 
-      <b>Price feed:</b> WPLS/DAI PulseX V1 pool.<br>
-      <b>Unlock logic:</b> verified fully on-chain at the moment of withdrawal.<br>
-      <b>Recovery:</b> All vault metadata (threshold + unlock time) stored on-chain.<br>
-      <b>Tracking:</b> This UI stores vault addresses locally for your convenience — safe to delete anytime.
+      • Price feed: WPLS/DAI PulseX V1.<br>
+      • Unlock logic: fully enforced on-chain.<br>
+      • All vault metadata stored on-chain (recoverable).<br>
+      • This UI stores vault addresses locally, safe to delete any time
+        (does NOT affect the vault).
     </div>
   </div>
 
@@ -158,6 +152,7 @@
     <div class="col">
       <div class="card">
         <h2>Create New Lock</h2>
+
         <form id="createForm">
           <label>Target price (DAI per 1 PLS)</label>
           <input id="targetPrice" type="text" placeholder="0.0100" required />
@@ -165,9 +160,10 @@
           <label>Backup unlock date & time</label>
           <input id="unlockDateTime" type="datetime-local" required />
 
-          <button type="submit" id="createBtn">Create Vault</button>
+          <button id="createBtn" type="submit">Create Vault</button>
           <div id="createStatus" class="small"></div>
         </form>
+
       </div>
     </div>
 
@@ -182,15 +178,14 @@
 
   <div class="card">
     <h2>Add Vault Address Manually</h2>
-    <div class="small">Paste any vault address created by your wallet.</div>
     <input id="manualVaultInput" type="text" placeholder="0x..." style="width:70%;" />
-    <button id="addVaultBtn">Add Vault</button>
+    <button id="addVaultBtn">Add</button>
     <div id="manualAddStatus" class="small"></div>
   </div>
 
   <div class="card">
     <h2>Your Locks</h2>
-    <div id="locksContainer" class="small">Connect wallet to load vaults.</div>
+    <div id="locksContainer" class="small">Connect wallet to load.</div>
   </div>
 
   <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
