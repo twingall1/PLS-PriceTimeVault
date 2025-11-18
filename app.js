@@ -347,7 +347,7 @@ function renderLocks() {
           <input class="mono"
             value="${lock.address}"
             readonly
-            style="background:#3a1500;border:1px solid #ffb84d;width:100%;padding:4px;border-radius:6px;" />
+            style="background:#ffffff;color:#000000;border:1px solid #ccd8e0;width:100%;padding:4px;border-radius:6px;" />
 
           <button class="copy-btn" onclick="copyAddr('${lock.address}')">📋</button>
         </div>
