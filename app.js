@@ -327,6 +327,11 @@ function renderLocks() {
     const current = parseFloat(ethers.utils.formatUnits(lock.currentPrice, 18));
     const bal = parseFloat(ethers.utils.formatUnits(lock.balance, 18));
     const countdown = formatCountdown(lock.unlockTime);
+    
+    let priceGoalPct = 0;
+    if (target > 0) {
+      priceGoalPct = Math.max(0, Math.min(100, (current / target) * 100));
+    }
 
     // Time progress bar percentage
     const nowTs = Math.floor(Date.now() / 1000);
@@ -369,16 +374,33 @@ function renderLocks() {
 
         ${status}
 
-        <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
-        <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
-        <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
-        <div><strong>Countdown:</strong> ${countdown}</div>
-
-
-
-        <!-- Locked PLS -->
-        <div style="margin-top:8px;">
-          <strong>Locked:</strong> ${bal.toFixed(4)} PLS
+        <!-- Metrics + Price goal chart -->
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+        
+          <!-- Left: metrics -->
+          <div style="flex:1;min-width:220px;">
+            <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
+            <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
+            <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
+            <div><strong>Countdown:</strong> ${countdown}</div>
+        
+            <!-- KEEP Locked PLS here -->
+            <div style="margin-top:8px;">
+              <strong>Locked:</strong> ${bal.toFixed(4)} PLS
+            </div>
+          </div>
+        
+          <!-- Right: price goal pie -->
+          <div class="price-goal-wrapper">
+            <div class="small">Price goal</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="price-goal-pie"
+                   style="background:conic-gradient(#00aa44 ${priceGoalPct}%, #ffffff 0);">
+              </div>
+              <div class="small">${priceGoalPct.toFixed(0)}%</div>
+            </div>
+          </div>
+        
         </div>
 
         <!-- Withdraw button -->
