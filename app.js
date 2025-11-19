@@ -334,7 +334,8 @@ function renderLocks() {
     // --- PRICE GOAL PERCENTAGE (FULL PRECISION, MATCHES CONTRACT) ---
     let priceGoalPct = 0;
     
-    if (lock.threshold.gt(0)) {
+    if (lock.threshold && ethers.BigNumber.isBigNumber(lock.threshold) && lock.threshold.gt(0)) {
+
     
         // Full precision percent: (currentPrice * 10000) / threshold
         // → basis points, then divide by 100 to get a float with 2 decimals
