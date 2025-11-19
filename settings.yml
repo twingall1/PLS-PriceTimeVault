@@ -1,0 +1,5 @@
+github_pages:
+  enabled: true
+  source:
+    branch: main
+    path: /
