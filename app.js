@@ -329,8 +329,14 @@ function renderLocks() {
     const countdown = formatCountdown(lock.unlockTime);
     
     let priceGoalPct = 0;
+    
     if (target > 0) {
       priceGoalPct = Math.max(0, Math.min(100, (current / target) * 100));
+    }
+    
+    // Force exact 100% when the vault is unlockable due to price
+    if (lock.canWithdraw && current >= target) {
+      priceGoalPct = 100;
     }
 
     // Time progress bar percentage
