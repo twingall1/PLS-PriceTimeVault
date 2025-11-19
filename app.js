@@ -133,9 +133,9 @@ async function refreshGlobalPrice() {
     }
 
     const price = daiRes.mul(ethers.constants.WeiPerEther).div(wplsRes);
-    const float = parseFloat(ethers.utils.formatUnits(price, 18));
+    const float = Number(ethers.utils.formatUnits(price, 18));
 
-    globalPriceDiv.textContent = `1 PLS ≈ ${float.toFixed(6)} DAI`;
+    globalPriceDiv.textContent = `1 PLS ≈ ${float.toFixed(7)} DAI`;
     globalPriceRawDiv.textContent = `raw 1e18: ${price.toString()}`;
 
   } catch (err) {
@@ -324,20 +324,33 @@ function renderLocks() {
       ? parseFloat(ethers.utils.formatUnits(lock.threshold, 18))
       : 0;
 
-    const current = parseFloat(ethers.utils.formatUnits(lock.currentPrice, 18));
+    const currentPrecise = Number(ethers.utils.formatUnits(lock.currentPrice, 18));
+
+    // show 7 decimals instead of 6
+    const current = parseFloat(currentPrecise.toFixed(7));
     const bal = parseFloat(ethers.utils.formatUnits(lock.balance, 18));
     const countdown = formatCountdown(lock.unlockTime);
     
+    // --- PRICE GOAL PERCENTAGE (FULL PRECISION, MATCHES CONTRACT) ---
     let priceGoalPct = 0;
     
-    if (target > 0) {
-      priceGoalPct = Math.max(0, Math.min(100, (current / target) * 100));
+    if (lock.threshold.gt(0)) {
+    
+        // Full precision percent: (currentPrice * 10000) / threshold
+        // → basis points, then divide by 100 to get a float with 2 decimals
+        const pctBN = lock.currentPrice.mul(10000).div(lock.threshold);
+    
+        priceGoalPct = pctBN.toNumber() / 100;
     }
     
-    // Force exact 100% when the vault is unlockable due to price
-    if (lock.canWithdraw && current >= target) {
-      priceGoalPct = 100;
+    // Clamp range 0–100
+    priceGoalPct = Math.max(0, Math.min(100, priceGoalPct));
+    
+    // Force 100% when unlockable by price
+    if (lock.canWithdraw && lock.currentPrice.gte(lock.threshold)) {
+        priceGoalPct = 100;
     }
+
 
     // Time progress bar percentage
     const nowTs = Math.floor(Date.now() / 1000);
@@ -396,7 +409,7 @@ function renderLocks() {
           <!-- LEFT: Metrics -->
           <div style="display:flex;flex-direction:column;flex:0 1 auto;">
             <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
-            <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
+            <div><strong>Current:</strong> ${current.toFixed(7)} DAI</div>
             <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
             <div><strong>Countdown:</strong> ${countdown}</div>
         
