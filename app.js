@@ -374,25 +374,26 @@ function renderLocks() {
 
         ${status}
 
-        <!-- Metrics + Price goal chart -->
-        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
         
-          <!-- Left: metrics -->
-          <div style="flex:1;min-width:220px;">
+        <!-- Metrics + Price goal chart side-by-side -->
+        <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:nowrap;margin-top:10px;">
+        
+          <!-- LEFT COLUMN: Metrics -->
+          <div style="flex:0 1 auto;">
             <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
             <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
             <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
             <div><strong>Countdown:</strong> ${countdown}</div>
         
-            <!-- KEEP Locked PLS here -->
+            <!-- Locked PLS -->
             <div style="margin-top:8px;">
               <strong>Locked:</strong> ${bal.toFixed(4)} PLS
             </div>
           </div>
         
-          <!-- Right: price goal pie -->
-          <div class="price-goal-wrapper">
-            <div class="small">Price goal</div>
+          <!-- RIGHT COLUMN: Price goal pie chart (tucked close) -->
+          <div class="price-goal-wrapper" style="flex:0 0 auto; margin-left:20px;">
+            <div class="small" style="text-align:center;">Price goal</div>
             <div style="display:flex;align-items:center;gap:6px;">
               <div class="price-goal-pie"
                    style="background:conic-gradient(#00aa44 ${priceGoalPct}%, #ffffff 0);">
@@ -402,6 +403,8 @@ function renderLocks() {
           </div>
         
         </div>
+
+
 
         <!-- Withdraw button -->
         <button onclick="withdrawVault('${lock.address}')"
