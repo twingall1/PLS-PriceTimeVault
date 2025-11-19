@@ -375,31 +375,45 @@ function renderLocks() {
         ${status}
 
         
-        <!-- Metrics + Price goal chart side-by-side -->
-        <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:nowrap;margin-top:10px;">
+        <!-- Metrics & Pie Chart (snug horizontal layout) -->
+        <div style="
+          display:flex;
+          flex-direction:row;
+          align-items:flex-start;
+          gap:16px;
+          margin-top:10px;
+          flex-wrap:nowrap;
+          width:fit-content;
+          max-width:100%;
+        ">
         
-          <!-- LEFT COLUMN: Metrics -->
-          <div style="flex:0 1 auto;">
+          <!-- LEFT: Metrics -->
+          <div style="display:flex;flex-direction:column;flex:0 1 auto;">
             <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
             <div><strong>Current:</strong> ${current.toFixed(6)} DAI</div>
             <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
             <div><strong>Countdown:</strong> ${countdown}</div>
         
-            <!-- Locked PLS -->
             <div style="margin-top:8px;">
               <strong>Locked:</strong> ${bal.toFixed(4)} PLS
             </div>
           </div>
         
-          <!-- RIGHT COLUMN: Price goal pie chart (tucked close) -->
-          <div class="price-goal-wrapper" style="flex:0 0 auto; margin-left:20px;">
-            <div class="small" style="text-align:center;">Price goal</div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <div class="price-goal-pie"
-                   style="background:conic-gradient(#00aa44 ${priceGoalPct}%, #ffffff 0);">
-              </div>
-              <div class="small">${priceGoalPct.toFixed(0)}%</div>
+          <!-- RIGHT: Snug pie chart -->
+          <div style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:flex-start;
+            flex:0 0 auto;
+            min-width:70px;
+            margin-left:8px;
+          ">
+            <div class="small">Price goal</div>
+            <div class="price-goal-pie"
+                 style="background:conic-gradient(#00aa44 ${priceGoalPct}%, #ffffff 0);margin-top:4px;">
             </div>
+            <div class="small">${priceGoalPct.toFixed(0)}%</div>
           </div>
         
         </div>
