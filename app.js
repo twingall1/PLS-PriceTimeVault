@@ -149,18 +149,7 @@ async function checkNetwork() {
   }
 }
 
-// Switch to PulseChain (if not on it)
-async function switchToPulseChain() {
-  try {
-    await walletProvider.send('wallet_switchEthereumChain', [{
-      chainId: '0x169'  // PulseChain Chain ID (369 in hex)
-    }]);
-    networkPrompt.style.display = "none";  // Hide prompt once successful
-  } catch (error) {
-    console.error("Error switching to PulseChain:", error);
-    alert("Failed to switch to PulseChain. Please try manually.");
-  }
-}
+
 // =====================================================
 // DETERMINE PAIR ORDER
 async function detectPairOrder() {
