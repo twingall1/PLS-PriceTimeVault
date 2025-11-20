@@ -6,18 +6,42 @@ if (!window.ethers) {
 }
 const ethers = window.ethers;
 
-// -----------------------------------
-// CONTRACT ADDRESSES (ALL LOWERCASE)
-// -----------------------------------
-const FACTORY_ADDRESS = "0x55cf712BD60Ffd31bDBfeC6831238Bd726BE48cC".toLowerCase();
+// =====================================================
+// 0. OKX SAFETY WRAPPERS
+// =====================================================
+
+// 🔒 OKX hardening: detect OKX provider fallback
+function getInjectedProvider() {
+  return (
+    window.ethereum ||
+    window.okxwallet ||
+    window.okxwallet?.ethereum ||
+    null
+  );
+}
+
+// 🔒 OKX hardening: safe-call wrapper for flaky RPC responses
+async function safeCall(promise, fallback) {
+  try {
+    const v = await promise;
+    return v === undefined || v === null ? fallback : v;
+  } catch {
+    return fallback;
+  }
+}
+
+// =====================================================
+// CONTRACT ADDRESSES
+// =====================================================
+const FACTORY_ADDRESS = "0x55cf712bd60ffd31bdbfec6831238bd726be48cc".toLowerCase();
 
 const WPLS_ADDRESS = "0xa1077a294dde1b09bb078844df40758a5d0f9a27".toLowerCase();
 const DAI_ADDRESS  = "0xefd766ccb38eaf1dfd701853bfce31359239f305".toLowerCase();
 const PAIR_ADDRESS = "0xe56043671df55de5cdf8459710433c10324de0ae".toLowerCase();
 
-// -----------------------------------
+// =====================================================
 // ABIs
-// -----------------------------------
+// =====================================================
 const factoryAbi = [
   "event VaultCreated(address indexed owner, address vault, uint256 priceThreshold1e18, uint256 unlockTime)",
   "function createVault(uint256,uint256) external returns (address)"
@@ -39,18 +63,18 @@ const pairAbi = [
   "function getReserves() view returns (uint112,uint112,uint32)"
 ];
 
-// -----------------------------------
+// =====================================================
 // STATE
-// -----------------------------------
+// =====================================================
 let walletProvider, signer, userAddress;
 let factory, pairContract;
 let locks = [];
 let countdownInterval;
 let pairToken0IsWPLS = true;
 
-// -----------------------------------
+// =====================================================
 // UI ELEMENTS
-// -----------------------------------
+// =====================================================
 const connectBtn          = document.getElementById("connectBtn");
 const walletSpan          = document.getElementById("walletAddress");
 const networkInfo         = document.getElementById("networkInfo");
@@ -66,12 +90,19 @@ const manualVaultInput    = document.getElementById("manualVaultInput");
 const addVaultBtn         = document.getElementById("addVaultBtn");
 const manualAddStatus     = document.getElementById("manualAddStatus");
 
-// -----------------------------------
+// =====================================================
 // CONNECT WALLET
-// -----------------------------------
+// =====================================================
 async function connect() {
   try {
-    walletProvider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    // 🔒 OKX hardening: use safe injected provider
+    const injected = getInjectedProvider();
+    if (!injected) {
+      alert("Wallet provider not found. Please reopen OKX or refresh.");
+      return;
+    }
+
+    walletProvider = new ethers.providers.Web3Provider(injected, "any");
     await walletProvider.send("eth_requestAccounts", []);
     signer = walletProvider.getSigner();
     userAddress = (await signer.getAddress()).toLowerCase();
@@ -99,24 +130,28 @@ async function connect() {
 }
 connectBtn.addEventListener("click", connect);
 
-// -----------------------------------
-// DETERMINE LIQUIDITY PAIR ORDERING
-// -----------------------------------
+// =====================================================
+// DETERMINE PAIR ORDER
+// =====================================================
 async function detectPairOrder() {
   try {
-    const token0 = (await pairContract.token0()).toLowerCase();
+    const token0 = (await safeCall(pairContract.token0(), WPLS_ADDRESS)).toLowerCase();
     pairToken0IsWPLS = (token0 === WPLS_ADDRESS);
   } catch {
     pairToken0IsWPLS = true;
   }
 }
 
-// -----------------------------------
+// =====================================================
 // PRICE FEED
-// -----------------------------------
+// =====================================================
 async function refreshGlobalPrice() {
   try {
-    const [r0, r1] = await pairContract.getReserves();
+    // 🔒 OKX hardening: safe fallback to zero
+    const [r0, r1] = await safeCall(
+      pairContract.getReserves(),
+      [ethers.constants.Zero, ethers.constants.Zero]
+    );
 
     let wplsRes, daiRes;
     if (pairToken0IsWPLS) {
@@ -127,8 +162,11 @@ async function refreshGlobalPrice() {
       daiRes  = r0;
     }
 
-    if (wplsRes.eq(0) || daiRes.eq(0)) {
-      globalPriceDiv.textContent = "No liquidity.";
+    if (!ethers.BigNumber.isBigNumber(wplsRes) ||
+        !ethers.BigNumber.isBigNumber(daiRes) ||
+        wplsRes.eq(0) || daiRes.eq(0)) {
+
+      globalPriceDiv.textContent = "Price error.";
       return;
     }
 
@@ -145,12 +183,10 @@ async function refreshGlobalPrice() {
 }
 setInterval(refreshGlobalPrice, 15000);
 
-// -----------------------------------
+// =====================================================
 // LOCAL STORAGE
-// -----------------------------------
-function localKey() {
-  return "pls-vaults-" + userAddress;
-}
+// =====================================================
+function localKey() { return "pls-vaults-" + userAddress; }
 
 function getLocalVaults() {
   if (!userAddress) return [];
@@ -174,9 +210,9 @@ function removeVault(addr) {
   loadLocalVaults();
 }
 
-// -----------------------------------
+// =====================================================
 // MANUAL ADD VAULT
-// -----------------------------------
+// =====================================================
 addVaultBtn.addEventListener("click", async () => {
   if (!userAddress) {
     manualAddStatus.textContent = "Connect wallet first.";
@@ -193,9 +229,9 @@ addVaultBtn.addEventListener("click", async () => {
   await loadLocalVaults();
 });
 
-// -----------------------------------
+// =====================================================
 // CREATE VAULT
-// -----------------------------------
+// =====================================================
 createForm.addEventListener("submit", async e => {
   e.preventDefault();
   if (!signer) return alert("Connect wallet first.");
@@ -247,9 +283,9 @@ createForm.addEventListener("submit", async e => {
   }
 });
 
-// -----------------------------------
+// =====================================================
 // LOAD LOCAL VAULTS
-// -----------------------------------
+// =====================================================
 async function loadLocalVaults() {
   const list = getLocalVaults();
   if (!list.length) {
@@ -272,47 +308,35 @@ async function loadLocalVaults() {
   renderLocks();
 }
 
-// -----------------------------------
+// =====================================================
 // LOAD VAULT DETAILS
-// -----------------------------------
+// =====================================================
 async function loadVaultDetails(lock) {
   try {
     const vault = new ethers.Contract(lock.address, vaultAbi, walletProvider);
 
-    const [
-      withdrawn,
-      currentPrice,
-      canWithdraw,
-      balance,
-      threshold,
-      unlockTime
-    ] = await Promise.all([
-      vault.withdrawn(),
-      vault.currentPricePLSinDAI(),
-      vault.canWithdraw(),
-      walletProvider.getBalance(lock.address),
-      vault.priceThreshold(),
-      vault.unlockTime()
-    ]);
+    const withdrawn   = await safeCall(vault.withdrawn(), false);
+    const currentPrice= await safeCall(vault.currentPricePLSinDAI(), ethers.constants.Zero);
+    const canWithdraw = await safeCall(vault.canWithdraw(), false);
+    const balance     = await safeCall(walletProvider.getBalance(lock.address), ethers.constants.Zero);
+    const threshold   = await safeCall(vault.priceThreshold(), ethers.constants.Zero);
+    const unlockTime  = await safeCall(vault.unlockTime(), ethers.constants.Zero);
 
-    lock.withdrawn   = withdrawn;
+    lock.withdrawn    = withdrawn;
     lock.currentPrice = currentPrice;
     lock.canWithdraw  = canWithdraw;
     lock.balance      = balance;
     lock.threshold    = threshold;
-    lock.unlockTime   = unlockTime.toNumber();
+    lock.unlockTime   = unlockTime.toNumber ? unlockTime.toNumber() : 0;
 
   } catch (err) {
     console.error("Vault load error:", lock.address, err);
   }
 }
 
-// --------------
-// PART 1 END
-// --------------
-// -----------------------------------
+// =====================================================
 // RENDER LOCK CARDS
-// -----------------------------------
+// =====================================================
 function renderLocks() {
   if (!locks.length) {
     locksContainer.textContent = "No locks found.";
@@ -320,40 +344,49 @@ function renderLocks() {
   }
 
   locksContainer.innerHTML = locks.map(lock => {
-    const target = lock.threshold
-      ? parseFloat(ethers.utils.formatUnits(lock.threshold, 18))
-      : 0;
 
-    const currentPrecise = Number(ethers.utils.formatUnits(lock.currentPrice, 18));
+    // 🔒 OKX safety: ensure BigNumbers before formatting
+    const thresholdBN = (lock.threshold && ethers.BigNumber.isBigNumber(lock.threshold))
+      ? lock.threshold
+      : ethers.constants.Zero;
 
-    // show 7 decimals instead of 6
+    const currentPriceBN = (lock.currentPrice && ethers.BigNumber.isBigNumber(lock.currentPrice))
+      ? lock.currentPrice
+      : ethers.constants.Zero;
+
+    const target = parseFloat(ethers.utils.formatUnits(thresholdBN, 18));
+    const currentPrecise = Number(ethers.utils.formatUnits(currentPriceBN, 18));
     const current = parseFloat(currentPrecise.toFixed(7));
-    const bal = parseFloat(ethers.utils.formatUnits(lock.balance, 18));
+
+    const bal = parseFloat(ethers.utils.formatUnits(
+      (ethers.BigNumber.isBigNumber(lock.balance) ? lock.balance : ethers.constants.Zero),
+      18
+    ));
+
     const countdown = formatCountdown(lock.unlockTime);
-    
-    // --- PRICE GOAL PERCENTAGE (FULL PRECISION, MATCHES CONTRACT) ---
+
+    // -------------------------------
+    // PRICE GOAL
+    // -------------------------------
     let priceGoalPct = 0;
-    
-    if (lock.threshold && ethers.BigNumber.isBigNumber(lock.threshold) && lock.threshold.gt(0)) {
 
-    
-        // Full precision percent: (currentPrice * 10000) / threshold
-        // → basis points, then divide by 100 to get a float with 2 decimals
-        const pctBN = lock.currentPrice.mul(10000).div(lock.threshold);
-    
-        priceGoalPct = pctBN.toNumber() / 100;
+    if (ethers.BigNumber.isBigNumber(thresholdBN) &&
+        ethers.BigNumber.isBigNumber(currentPriceBN) &&
+        thresholdBN.gt(0)) {
+
+      const pctBN = currentPriceBN.mul(10000).div(thresholdBN);
+      priceGoalPct = pctBN.toNumber() / 100;
     }
-    
-    // Clamp range 0–100
+
     priceGoalPct = Math.max(0, Math.min(100, priceGoalPct));
-    
-    // Force 100% when unlockable by price
-    if (lock.canWithdraw && lock.currentPrice.gte(lock.threshold)) {
-        priceGoalPct = 100;
+
+    if (lock.canWithdraw && currentPriceBN.gte(thresholdBN)) {
+      priceGoalPct = 100;
     }
 
-
-    // Time progress bar percentage
+    // -------------------------------
+    // TIME PROGRESS
+    // -------------------------------
     const nowTs = Math.floor(Date.now() / 1000);
     const progressPct = (timeProgress(nowTs, lock.unlockTime) * 100).toFixed(2);
 
@@ -366,20 +399,11 @@ function renderLocks() {
 
     return `
       <div class="card vault-card ${lock.canWithdraw ? 'vault-unlockable' : ''}">
-
-        <!-- Address + Copy button -->
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;width:100%;max-width:500px;">
           <input class="mono"
             value="${lock.address}"
             readonly
-            style="
-              background:#ffffff;
-              color:#000000;
-              border:1px solid #ccd8e0;
-              width:100%;
-              padding:4px;
-              border-radius:6px;
-            " />
+            style="background:#ffffff;color:#000000;border:1px solid #ccd8e0;width:100%;padding:4px;border-radius:6px;" />
         
           <div class="copy-icon-btn" onclick="copyAddr('${lock.address}')">
             <svg viewBox="0 0 24 24">
@@ -391,62 +415,31 @@ function renderLocks() {
           </div>
         </div>
 
-
         ${status}
 
-        
-        <!-- Metrics & Pie Chart (snug horizontal layout) -->
-        <div style="
-          display:flex;
-          flex-direction:row;
-          align-items:flex-start;
-          gap:16px;
-          margin-top:10px;
-          flex-wrap:nowrap;
-          width:fit-content;
-          max-width:100%;
-        ">
-        
-          <!-- LEFT: Metrics -->
+        <div style="display:flex;flex-direction:row;align-items:flex-start;gap:16px;margin-top:10px;flex-wrap:nowrap;width:fit-content;max-width:100%;">
           <div style="display:flex;flex-direction:column;flex:0 1 auto;">
             <div><strong>Target:</strong> 1 PLS ≥ ${target.toFixed(6)} DAI</div>
             <div><strong>Current:</strong> ${current.toFixed(7)} DAI</div>
             <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
             <div><strong>Countdown:</strong> ${countdown}</div>
-        
-            <div style="margin-top:8px;">
-              <strong>Locked:</strong> ${bal.toFixed(4)} PLS
-            </div>
+            <div style="margin-top:8px;"><strong>Locked:</strong> ${bal.toFixed(4)} PLS</div>
           </div>
-        
-          <!-- RIGHT: Snug pie chart -->
-          <div style="
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:flex-start;
-            flex:0 0 auto;
-            min-width:70px;
-            margin-left:8px;
-          ">
+
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;flex:0 0 auto;min-width:70px;margin-left:8px;">
             <div class="small">Price goal</div>
             <div class="price-goal-pie"
                  style="background:conic-gradient(#00aa44 ${priceGoalPct}%, #ffffff 0);margin-top:4px;">
             </div>
             <div class="small">${priceGoalPct.toFixed(0)}%</div>
           </div>
-        
         </div>
 
-
-
-        <!-- Withdraw button -->
         <button onclick="withdrawVault('${lock.address}')"
           ${(!lock.canWithdraw || lock.withdrawn) ? "disabled" : ""}>
           Withdraw
         </button>
 
-        <!-- Remove button -->
         <button onclick="removeVault('${lock.address}')"
           style="margin-left:10px;background:#b91c1c;">
           Remove
@@ -456,14 +449,14 @@ function renderLocks() {
   }).join("");
 }
 
-// -----------------------------------
+// =====================================================
 // WITHDRAW
-// -----------------------------------
+// =====================================================
 async function withdrawVault(addr) {
   try {
     const vault = new ethers.Contract(addr, vaultAbi, signer);
-    const tx = await vault.withdraw();
-    await tx.wait();
+    const tx = await safeCall(vault.withdraw(), null);
+    if (tx) await tx.wait();
     await loadLocalVaults();
   } catch (err) {
     alert("Withdraw failed: " + err.message);
@@ -471,9 +464,9 @@ async function withdrawVault(addr) {
   }
 }
 
-// -----------------------------------
-// COPY ADDRESS TO CLIPBOARD
-// -----------------------------------
+// =====================================================
+// COPY ADDRESS
+// =====================================================
 function copyAddr(addr) {
   navigator.clipboard.writeText(addr).catch(err => {
     console.error("Copy failed:", err);
