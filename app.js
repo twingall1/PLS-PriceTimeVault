@@ -91,6 +91,10 @@ const addVaultBtn         = document.getElementById("addVaultBtn");
 const manualAddStatus     = document.getElementById("manualAddStatus");
 
 // =====================================================
+// NETWORK PROMPT (ADDED)
+const networkPrompt = document.getElementById("networkPrompt");
+
+// =====================================================
 // CONNECT WALLET
 // =====================================================
 async function connect() {
@@ -114,6 +118,9 @@ async function connect() {
     factory      = new ethers.Contract(FACTORY_ADDRESS, factoryAbi, signer);
     pairContract = new ethers.Contract(PAIR_ADDRESS, pairAbi, walletProvider);
 
+    // Check the network immediately after connecting
+    await checkNetwork(); // This checks if the user is connected to PulseChain
+
     await detectPairOrder();
     await refreshGlobalPrice();
     await loadLocalVaults();
@@ -129,10 +136,33 @@ async function connect() {
   }
 }
 connectBtn.addEventListener("click", connect);
+// =====================================================
+// NETWORK CHECK AND SWITCHING (NEW)
+async function checkNetwork() {
+  const { chainId } = await walletProvider.getNetwork();  // Get current chainId
+  
+  // If not connected to PulseChain (chainId 369), show the prompt
+  if (chainId !== 369) {
+    networkPrompt.style.display = "block";  // Show the prompt
+  } else {
+    networkPrompt.style.display = "none";  // Hide the prompt if connected to PulseChain
+  }
+}
 
+// Switch to PulseChain (if not on it)
+async function switchToPulseChain() {
+  try {
+    await walletProvider.send('wallet_switchEthereumChain', [{
+      chainId: '0x169'  // PulseChain Chain ID (369 in hex)
+    }]);
+    networkPrompt.style.display = "none";  // Hide prompt once successful
+  } catch (error) {
+    console.error("Error switching to PulseChain:", error);
+    alert("Failed to switch to PulseChain. Please try manually.");
+  }
+}
 // =====================================================
 // DETERMINE PAIR ORDER
-// =====================================================
 async function detectPairOrder() {
   try {
     const token0 = (await safeCall(pairContract.token0(), WPLS_ADDRESS)).toLowerCase();
@@ -144,14 +174,9 @@ async function detectPairOrder() {
 
 // =====================================================
 // PRICE FEED
-// =====================================================
 async function refreshGlobalPrice() {
   try {
-    // 🔒 OKX hardening: safe fallback to zero
-    const [r0, r1] = await safeCall(
-      pairContract.getReserves(),
-      [ethers.constants.Zero, ethers.constants.Zero]
-    );
+    const [r0, r1] = await safeCall(pairContract.getReserves(), [ethers.constants.Zero, ethers.constants.Zero]);
 
     let wplsRes, daiRes;
     if (pairToken0IsWPLS) {
@@ -162,10 +187,7 @@ async function refreshGlobalPrice() {
       daiRes  = r0;
     }
 
-    if (!ethers.BigNumber.isBigNumber(wplsRes) ||
-        !ethers.BigNumber.isBigNumber(daiRes) ||
-        wplsRes.eq(0) || daiRes.eq(0)) {
-
+    if (!ethers.BigNumber.isBigNumber(wplsRes) || !ethers.BigNumber.isBigNumber(daiRes) || wplsRes.eq(0) || daiRes.eq(0)) {
       globalPriceDiv.textContent = "Price error.";
       return;
     }
@@ -184,8 +206,7 @@ async function refreshGlobalPrice() {
 setInterval(refreshGlobalPrice, 15000);
 
 // =====================================================
-// LOCAL STORAGE
-// =====================================================
+// LOCAL STORAGE & VAULT MANAGEMENT
 function localKey() { return "pls-vaults-" + userAddress; }
 
 function getLocalVaults() {
@@ -212,7 +233,6 @@ function removeVault(addr) {
 
 // =====================================================
 // MANUAL ADD VAULT
-// =====================================================
 addVaultBtn.addEventListener("click", async () => {
   if (!userAddress) {
     manualAddStatus.textContent = "Connect wallet first.";
@@ -231,7 +251,6 @@ addVaultBtn.addEventListener("click", async () => {
 
 // =====================================================
 // CREATE VAULT
-// =====================================================
 createForm.addEventListener("submit", async e => {
   e.preventDefault();
   if (!signer) return alert("Connect wallet first.");
@@ -285,7 +304,6 @@ createForm.addEventListener("submit", async e => {
 
 // =====================================================
 // LOAD LOCAL VAULTS
-// =====================================================
 async function loadLocalVaults() {
   const list = getLocalVaults();
   if (!list.length) {
@@ -310,7 +328,6 @@ async function loadLocalVaults() {
 
 // =====================================================
 // LOAD VAULT DETAILS
-// =====================================================
 async function loadVaultDetails(lock) {
   try {
     const vault = new ethers.Contract(lock.address, vaultAbi, walletProvider);
@@ -336,7 +353,6 @@ async function loadVaultDetails(lock) {
 
 // =====================================================
 // RENDER LOCK CARDS
-// =====================================================
 function renderLocks() {
   if (!locks.length) {
     locksContainer.textContent = "No locks found.";
@@ -451,7 +467,6 @@ function renderLocks() {
 
 // =====================================================
 // WITHDRAW
-// =====================================================
 async function withdrawVault(addr) {
   try {
     const vault = new ethers.Contract(addr, vaultAbi, signer);
@@ -466,17 +481,15 @@ async function withdrawVault(addr) {
 
 // =====================================================
 // COPY ADDRESS
-// =====================================================
 function copyAddr(addr) {
   navigator.clipboard.writeText(addr).catch(err => {
     console.error("Copy failed:", err);
   });
 }
 
-// -----------------------------------
+// =====================================================
 // TIME PROGRESS HELPER
 // value from 0 → 1
-// -----------------------------------
 function timeProgress(now, unlockTime, thresholdTime = 0) {
   if (now >= unlockTime) return 1;
   const total = unlockTime - thresholdTime;
@@ -485,9 +498,8 @@ function timeProgress(now, unlockTime, thresholdTime = 0) {
   return Math.max(0, Math.min(1, done / total));
 }
 
-// -----------------------------------
+// =====================================================
 // UTILITIES
-// -----------------------------------
 function formatTimestamp(ts) {
   return new Date(ts * 1000).toLocaleString();
 }
@@ -514,4 +526,5 @@ function formatCountdown(ts) {
 
 // -----------------------------------
 // END OF FILE
-// -----------------------------------
+
+
