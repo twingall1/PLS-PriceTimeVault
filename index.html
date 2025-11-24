@@ -2,203 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Price + Time Vaults (PLS / pDAI / HEX)</title>
+  <title>PLS Price + Time Lock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    :root {
-      /* dark theme */
-      --bg: #050815;
-      --text: #f3f4f6;
-      --subtext: #9ca3af;
-      --card-bg: #0b1020;
-      --border: #1e2638;
-      --accent: #16a34a;
-      --accent-hover: #1fc556;
-      --input-bg: #020617;
-      --input-border: #4b5563;
-      --status-ok: #4ade80;
-      --status-warn: #facc15;
-      --status-bad: #f87171;
-      --fee: #ef4444;
-      --copy-bg: #1e40af;
-      --copy-bg-hover: #1d4ed8;
-      --min-btn: #facc15;
-      --min-btn-hover: #fbbf24;
-    }
-    body.light-theme {
-      /* light theme */
-      --bg: #f5f9ff;
-      --text: #1a1a1a;
-      --subtext: #466078;
-      --card-bg: #ffffff;
-      --border: #d0e0f0;
-      --accent: #1f7aec;
-      --accent-hover: #0059cc;
-      --input-bg: #ffffff;
-      --input-border: #b2c8dd;
-      --status-ok: #007f3b;
-      --status-warn: #b38600;
-      --status-bad: #c62828;
-      --fee: #c62828;
-      --copy-bg: #1f7aec;
-      --copy-bg-hover: #0059cc;
-      --min-btn: #eab308;
-      --min-btn-hover: #ca8a04;
-    }
-
+    /* --------- CLEAN LIGHT THEME ---_------- */
     body {
       font-family: system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #f5f9ff;
+      color: #1a1a1a;
       margin: 0;
       padding: 16px;
     }
+
     h1, h2 {
       margin-top: 0;
-      color: var(--text);
+      color: #003366;
     }
 
     .card {
-      background: var(--card-bg);
+      background: #ffffff;
       border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    }
-    body.light-theme .card {
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #d0e0f0;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    input, button, select {
-      padding: 6px 8px;
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .col {
+      flex: 1 1 280px;
+    }
+
+    input, button {
+      padding: 8px 10px;
       border-radius: 8px;
-      border: 1px solid var(--input-border);
-      background: var(--input-bg);
-      color: var(--text);
+      border: 1px solid #b2c8dd;
+      background: #ffffff;
+      color: #1a1a1a;
       font-size: 14px;
     }
 
     button {
       cursor: pointer;
       border: none;
-      background: var(--accent);
+      background: #1f7aec;
       color: #ffffff;
       font-weight: 600;
-      transition: background 0.15s;
+      transition: background 0.2s;
     }
-    button:hover { background: var(--accent-hover); }
-    button[disabled] { opacity: 0.5; cursor: not-allowed; }
-
-    select { cursor: pointer; }
+    button:hover {
+      background: #0059cc;
+    }
+    button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     .small {
       font-size: 12px;
-      color: var(--subtext);
+      color: #466078;
     }
 
+    /* Status tags */
     .tag {
       padding: 2px 8px;
       border-radius: 999px;
       font-size: 11px;
-      background: #11182733;
-      border: 1px solid var(--border);
+      background: #e6eff7;
+      border: 1px solid #c6d8ea;
       margin-right: 6px;
-      margin-top: 4px;
+      color: #003366;
       display: inline-block;
     }
+    .status-ok { color: #007f3b; }
+    .status-warn { color: #b38600; }
+    .status-bad { color: #c62828; }
 
-    .status-ok { color: var(--status-ok); }
-    .status-warn { color: var(--status-warn); }
-    .status-bad { color: var(--status-bad); }
-
+    /* Monospace address field */
     .mono {
       font-family: Courier, monospace;
       font-size: 13px;
       user-select: text !important;
-      color: #a5b4fc;
+      color: #003366;
     }
 
-    /* HEADER */
-    .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .header-title-block {
-      display: flex;
-      flex-direction: column;
-    }
-    .header-subtitle {
-      font-size: 12px;
-      color: var(--subtext);
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .theme-toggle {
-      padding: 4px 8px;
-      font-size: 12px;
-      background: #334155;
-    }
-    body.light-theme .theme-toggle {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .wallet-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      align-items: flex-end;
-    }
-
-    /* ===== 3 COLUMN MOVE ===== */
-    .three-col-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-    .col-1, .col-2, .col-3 {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .about-onecol {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    @media (max-width: 1100px) {
-      .three-col-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* LOCKS */
-
-    #locksContainer {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
+    /* Unlockable glow */
     .vault-card {
       transition: box-shadow 0.3s, border 0.3s;
     }
@@ -207,242 +101,152 @@
       border: 1px solid #00b870 !important;
     }
 
-    .vault-header {
+    /* Copy-icon button */
+    .copy-icon-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
-      white-space: nowrap;
-    }
-    .vault-header-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: nowrap;
-    }
-    .vault-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-
-    /* FIVE COLUMN BODY */
-    .vault-body {
-      display: inline-flex;
-      align-items: flex-start;
-      gap: 24px; /* breathing room */
-      white-space: nowrap;
-      width: 100%;
-    }
-
-    /* Column 1 (restored text) */
-    .vault-col-main {
-      flex: 0 1 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      white-space: nowrap;
-    }
-
-    .col1-line {
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .col1-value-bold {
-      font-weight: 600;
-    }
-
-    /* Column 2 (buttons) */
-    .vault-col-buttons {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      gap: 6px;
-    }
-
-    /* Column 3 (pie) */
-    .vault-col-pie {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-    }
-    .price-goal-pie {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: #020617;
-      border: 1px solid #000;
-    }
-
-    /* Column 4 (time) */
-    .vault-col-time {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      white-space: nowrap;
-    }
-    .time-progress-bar-bg {
-      width: 100%;
-      height: 8px;
-      border-radius: 999px;
-      background: #1f2937;
-      overflow: hidden;
-    }
-    .time-progress-bar-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: #22c55e;
-      width: 0%;
-      transition: width 0.3s linear;
-    }
-
-    /* Column 5 (feeds + min/max) */
-    .vault-col-feeds {
-      flex: 0 0 auto;
-      white-space: nowrap;
-      min-width: 200px;
-    }
-
-    /* Buttons */
-    .minimize-btn,
-    .maximize-btn {
-      background: var(--min-btn);
-      color: #111827;
-      font-size: 11px;
-      padding: 4px 6px;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
       border-radius: 6px;
+      background: #1f7aec;
+      cursor: pointer;
+    }
+    .copy-icon-btn:hover {
+      background: #0059cc;
+    }
+    .copy-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+    /*Pie Chart*/
+    .price-goal-wrapper {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      gap:4px;
+      min-width:90px;
+    }
+    
+    .price-goal-pie {
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      border:1px solid #000000;  /* black border */
+      background:#ffffff;        /* white background by default */
     }
 
-    .vault-card.collapsed .vault-body {
-      display: none;
-    }
-    .vault-card.collapsed .minimize-btn {
-      display: none;
-    }
-    .vault-card .maximize-btn {
-      display: none;
-    }
-    .vault-card.collapsed .maximize-btn {
-      display: inline-flex;
-    }
   </style>
 </head>
 
 <body>
-  <header class="header-row">
-    <div class="header-left">
-      <img src="PulseChainLogoTransparent.png"
-           alt="PLS"
-           style="height:38px;width:auto;">
-      <div class="header-title-block">
-        <div><b>Price + Time Vaults (PLS / pDAI / HEX)</b></div>
-        <div class="header-subtitle">
-          Discipline vaults with price-mediated unlock &amp; time backup
-        </div>
-      </div>
+
+  <h1 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/PulseChainLogoTransparent.png/1200px-PulseChainLogoTransparent.png"
+         alt="PLS"
+         style="height:38px;width:auto;">
+  
+    <span>
+      <b>PLS:    Price-mediated-unlock Vault, with timelock backup</b>
+    </span>
+  </h1>
+
+
+  <div class="card">
+    <!-- Network Prompt for switching to PulseChain -->
+    <div id="networkPrompt" style="display: none; background-color: #f44336; color: white; padding: 10px; text-align: center; font-weight: bold;">
+      ⚠️ Please switch to PulseChain (Chain ID: 369) in your wallet.<br>
+      <span style="font-size: 13px; font-weight: normal;">
+        In OKX Wallet: open <b>“DApp Connection”</b> and change network to <b>PulseChain</b>.
+      </span>
     </div>
+    <button id="connectBtn">Connect Wallet</button>
+    <span id="walletAddress" class="mono"></span>
+    <div id="networkInfo" class="small"></div>
+  </div>
 
-    <div class="header-right">
-      <button id="themeToggle" class="theme-toggle">🌙 Night</button>
-      <div class="wallet-info">
-        <button id="connectBtn">Connect Wallet</button>
-        <span id="walletAddress" class="mono"></span>
-        <div class="small" id="networkInfo"></div>
-      </div>
+  <div class="card">
+    <h2>About This App</h2>
+    <div class="small">
+      • Deposit PLS by sending it directly to the vault address.<br>
+      • Withdraw when price OR backup time conditions are satisfied.<br><br>
+
+      • Price feed: WPLS/DAI PulseX V1.<br>
+      • Unlock logic: fully enforced on-chain.<br>
+      • All vault metadata stored on-chain (recoverable).<br>
+      • This UI stores vault addresses locally, safe to delete any time
+        (does NOT affect the vault).
     </div>
-  </header>
+  </div>
 
-
-  <!-- === THREE COLUMN LAYOUT === -->
-  <div class="three-col-grid">
-
-    <!-- COLUMN 1 -->
-    <div class="col-1">
-
+  <div class="row">
+    <div class="col">
       <div class="card">
         <h2>Create New Lock</h2>
-        <form id="createForm">
-          <label>Asset</label><br>
-          <select id="assetSelect">
-            <option value="PLS">PLS (native)</option>
-            <option value="PDAI">pDAI (token)</option>
-            <option value="HEX">HEX (token)</option>
-          </select>
-          <br><br>
 
-          <label>Target price (USD per 1 unit)</label>
+        <form id="createForm">
+          <label>Target price (DAI per 1 PLS)</label>
           <input id="targetPrice" type="text" placeholder="0.0100" required />
 
-          <label>Time unlock date &amp; time</label>
+          <label>Backup unlock date & time</label>
           <input id="unlockDateTime" type="datetime-local" required />
 
-          <button type="submit" id="createBtn">Create Vault</button>
+          <button id="createBtn" type="submit">Create Vault</button>
           <div id="createStatus" class="small"></div>
         </form>
-      </div>
 
-      <div class="card">
-        <h2>Add Vault Address Manually</h2>
-        <div class="small">
-          Paste any supported vault address created by this factory.
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-          <input id="manualVaultInput" type="text" placeholder="0x..."
-                 style="flex:1 1 220px;min-width:200px;" />
-          <button id="addVaultBtn">Add</button>
-        </div>
-        <div id="manualAddStatus" class="small"></div>
       </div>
-
     </div>
-
-
-    <!-- COLUMN 2 -->
-    <div class="col-2">
+  <!-- RIGHT COLUMN -->
+    <div class="col">
       <div class="card">
-        <h2>Global Price Feed</h2>
+
+        <h2>Global Price Feed (PulseX V1 WPLS/DAI)</h2>
+
         <div class="small" style="margin-bottom:6px;">
-          Source: PulseX <b>pools</b> for the selected asset.<br>
-          Each asset uses a <b>primary</b> &amp; <b>backup</b> feed.<br>
-          Feeds chosen by <b>USD-normalized liquidity</b>.<br>
-          Pair address:<br>
-          <span id="pairAddress" class="mono"></span>
+          Source: PulseX <b>V1</b> WPLS/DAI liquidity pool<br>
+          Pair address:
         </div>
-        <div id="globalPrice"></div>
-        <div id="globalPriceRaw" class="small"></div>
-      </div>
-    </div>
 
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;width:100%;max-width:420px;">
+          <input class="mono"
+                 value="0xe56043671df55de5cdf8459710433c10324de0ae"
+                 readonly
+                 style="
+                   background:#ffffff;
+                   color:#000000;
+                   border:1px solid #ccd8e0;
+                   width:100%;
+                   padding:4px;
+                   border-radius:6px;
+                 " />
 
-    <!-- COLUMN 3 -->
-    <div class="col-3">
-      <div class="card">
-        <h2>About This App</h2>
-        <div class="small about-onecol">
-          • Create <b>immutable vaults</b> for PLS, pDAI, or HEX.<br>
-          • Tokens lock until your <b>USD price</b> target OR time unlock.<br>
-          • Feeds from PulseX pools (PLS/DAI, pDAI/DAI, HEX/USDC+DAI).<br>
-          • Contract logic lives fully on-chain (no admin keys).<br>
-          • Thresholds are <b>USD × 1e18</b> per 1 token.<br>
-          • Time unlock always works even if feeds fail.<br>
-          • Vault addresses stored only in local storage.<br>
-          <div class="fee-note">
-            ⚠ A 0.5% fee is charged on successful withdrawal.
+          <div class="copy-icon-btn" onclick="copyAddr('0xe56043671df55de5cdf8459710433c10324de0ae')">
+            <svg viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
+                       0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                       2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
+                       16H8V7h11v14z"/>
+            </svg>
           </div>
         </div>
+
+        <div id="globalPrice"></div>
+        <div id="globalPriceRaw" class="small"></div>
+
       </div>
     </div>
-
   </div>
-  <!-- === END GRID === -->
-
+  
+  <!-- ADD VAULT MANUALLY -->
+  <div class="card">
+    <h2>Add Vault Address Manually</h2>
+    <input id="manualVaultInput" type="text" placeholder="0x..." style="width:70%;" />
+    <button id="addVaultBtn">Add</button>
+    <div id="manualAddStatus" class="small"></div>
+  </div>
 
   <div class="card">
     <h2>Your Locks</h2>
