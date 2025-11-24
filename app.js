@@ -761,7 +761,7 @@ function renderLocks() {
           <div class="vault-header-spacer"></div>
         
           <div class="vault-header-right">
-            <div style="display:flex;align-items:center;gap:4px;position:relative;">
+            <div class="vault-header-actions">
               <input class="mono"
                 value="${addrFull}"
                 readonly
@@ -774,18 +774,25 @@ function renderLocks() {
                   padding:3px 4px;
                   border-radius:6px;
                 " />
+          
               <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
+                <!-- copy SVG -->
                 <svg viewBox="0 0 24 24">
                   <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
-                          0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
-                          2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
-                          16H8V7h11v14z"/>
+                           0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                           2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
+                           16H8V7h11v14z"/>
                 </svg>
               </div>
-        
+          
+              <!-- NEW: Minimize always sits here -->
+              <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▾ Min</button>
+          
+              <!-- NEW: Maximize appears in same place -->
               <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">⬆ Max</button>
             </div>
           </div>
+
         
         </div>
 
