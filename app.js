@@ -1,5 +1,5 @@
 // ================================
-// app.js — V9.1, USD-native, wide 5-column vault layout
+// app.js — V9.1, improved wide 5-column vault layout
 // ================================
 
 console.log("Generic vault app.js loaded (V9.1 wide cards).");
@@ -49,7 +49,6 @@ function setCollapsed(addr, collapsed) {
 // -------------------------------
 // CONFIG
 // -------------------------------
-// TODO: set this to your deployed V9.1 factory address:
 const FACTORY_ADDRESS = "0xAa64fc582874a4d1855582E0875A8ACf39f3E4CB".toLowerCase();
 
 const ADDR = {
@@ -508,126 +507,126 @@ async function loadLocalVaults() {
     try {
       const vault = new ethersLib.Contract(addr, vaultAbi, provider);
 
-    const [
-      owner,
-      lockToken,
-      isNative,
-      threshold,
-      unlockTime,
-      startTime,
-      withdrawn,
-      primaryQuoteToken,
-      backupQuoteToken,
-      primaryPair,
-      backupPair,
-      primaryLockTokenIsToken0,
-      backupLockTokenIsToken0,
-    ] = await Promise.all([
-      vault.owner(),
-      vault.lockToken(),
-      vault.isNative(),
-      vault.priceThreshold(),
-      vault.unlockTime(),
-      vault.startTime(),
-      vault.withdrawn(),
-      vault.primaryQuoteToken(),
-      vault.backupQuoteToken(),
-      vault.primaryPair(),
-      vault.backupPair(),
-      vault.primaryLockTokenIsToken0(),
-      vault.backupLockTokenIsToken0()
-    ]);
+      const [
+        owner,
+        lockToken,
+        isNative,
+        threshold,
+        unlockTime,
+        startTime,
+        withdrawn,
+        primaryQuoteToken,
+        backupQuoteToken,
+        primaryPair,
+        backupPair,
+        primaryLockTokenIsToken0,
+        backupLockTokenIsToken0,
+      ] = await Promise.all([
+        vault.owner(),
+        vault.lockToken(),
+        vault.isNative(),
+        vault.priceThreshold(),
+        vault.unlockTime(),
+        vault.startTime(),
+        vault.withdrawn(),
+        vault.primaryQuoteToken(),
+        vault.backupQuoteToken(),
+        vault.primaryPair(),
+        vault.backupPair(),
+        vault.primaryLockTokenIsToken0(),
+        vault.backupLockTokenIsToken0()
+      ]);
 
-    const lockTokenLower = lockToken.toLowerCase();
-    const assetLabel = detectAssetLabel(lockTokenLower, isNative);
+      const lockTokenLower = lockToken.toLowerCase();
+      const assetLabel = detectAssetLabel(lockTokenLower, isNative);
 
-    let cfgByLabel = null;
-    if (assetLabel === "PLS") cfgByLabel = ASSETS.PLS;
-    else if (assetLabel === "pDAI") cfgByLabel = ASSETS.PDAI;
-    else if (assetLabel === "HEX") cfgByLabel = ASSETS.HEX;
+      let cfgByLabel = null;
+      if (assetLabel === "PLS") cfgByLabel = ASSETS.PLS;
+      else if (assetLabel === "pDAI") cfgByLabel = ASSETS.PDAI;
+      else if (assetLabel === "HEX") cfgByLabel = ASSETS.HEX;
 
-    const lockDecimals         = cfgByLabel ? cfgByLabel.lockDecimals         : 18;
-    const primaryQuoteDecimals = cfgByLabel ? cfgByLabel.primaryQuoteDecimals : 18;
-    const backupQuoteDecimals  = cfgByLabel ? cfgByLabel.backupQuoteDecimals  : 18;
+      const lockDecimals         = cfgByLabel ? cfgByLabel.lockDecimals         : 18;
+      const primaryQuoteDecimals = cfgByLabel ? cfgByLabel.primaryQuoteDecimals : 18;
+      const backupQuoteDecimals  = cfgByLabel ? cfgByLabel.backupQuoteDecimals  : 18;
 
-    let balanceBN;
-    if (isNative) {
-      balanceBN = await provider.getBalance(addr);
-    } else {
-      const erc20 = new ethersLib.Contract(lockToken, erc20Abi, provider);
-      balanceBN = await erc20.balanceOf(addr);
-    }
-
-    let chosenPriceBN = ethersLib.constants.Zero;
-    let primaryValid = false;
-    let primaryPriceBN = ethersLib.constants.Zero;
-    let primaryQuoteResBN = ethersLib.constants.Zero;
-    let backupValid = false;
-    let backupPriceBN = ethersLib.constants.Zero;
-    let backupQuoteResBN = ethersLib.constants.Zero;
-    let usedPrimary = false;
-    let usedBackup = false;
-    let priceValid = false;
-
-    try {
-      const detail = await vault.priceDetail();
-      chosenPriceBN     = detail[0];
-      primaryValid      = detail[1];
-      primaryPriceBN    = detail[2];
-      primaryQuoteResBN = detail[3];
-      backupValid       = detail[4];
-      backupPriceBN     = detail[5];
-      backupQuoteResBN  = detail[6];
-      usedPrimary       = detail[7];
-      usedBackup        = detail[8];
-      priceValid        = detail[9];
-    } catch {
-      try {
-        chosenPriceBN = await vault.currentPrice1e18();
-        priceValid = true;
-      } catch {
-        priceValid = false;
+      let balanceBN;
+      if (isNative) {
+        balanceBN = await provider.getBalance(addr);
+      } else {
+        const erc20 = new ethersLib.Contract(lockToken, erc20Abi, provider);
+        balanceBN = await erc20.balanceOf(addr);
       }
-    }
 
-    let canWithdraw = false;
-    try {
-      canWithdraw = await vault.canWithdraw();
-    } catch {
-      canWithdraw = false;
-    }
+      let chosenPriceBN = ethersLib.constants.Zero;
+      let primaryValid = false;
+      let primaryPriceBN = ethersLib.constants.Zero;
+      let primaryQuoteResBN = ethersLib.constants.Zero;
+      let backupValid = false;
+      let backupPriceBN = ethersLib.constants.Zero;
+      let backupQuoteResBN = ethersLib.constants.Zero;
+      let usedPrimary = false;
+      let usedBackup = false;
+      let priceValid = false;
 
-    results.push({
-      address: addr.toLowerCase(),
-      assetLabel,
-      lockToken: lockTokenLower,
-      primaryQuoteToken: primaryQuoteToken.toLowerCase(),
-      backupQuoteToken:  backupQuoteToken.toLowerCase(),
-      primaryPair:       primaryPair.toLowerCase(),
-      backupPair:        backupPair.toLowerCase(),
-      primaryLockTokenIsToken0,
-      backupLockTokenIsToken0,
-      isNative,
-      threshold,
-      unlockTime: unlockTime.toNumber(),
-      startTime:  startTime.toNumber(),
-      withdrawn,
-      balanceBN,
-      chosenPriceBN,
-      primaryValid,
-      primaryPriceBN,
-      primaryQuoteResBN,
-      backupValid,
-      backupPriceBN,
-      backupQuoteResBN,
-      usedPrimary,
-      usedBackup,
-      priceValid,
-      lockDecimals,
-      primaryQuoteDecimals,
-      backupQuoteDecimals,
-      canWithdraw
-    });
+      try {
+        const detail = await vault.priceDetail();
+        chosenPriceBN     = detail[0];
+        primaryValid      = detail[1];
+        primaryPriceBN    = detail[2];
+        primaryQuoteResBN = detail[3];
+        backupValid       = detail[4];
+        backupPriceBN     = detail[5];
+        backupQuoteResBN  = detail[6];
+        usedPrimary       = detail[7];
+        usedBackup        = detail[8];
+        priceValid        = detail[9];
+      } catch {
+        try {
+          chosenPriceBN = await vault.currentPrice1e18();
+          priceValid = true;
+        } catch {
+          priceValid = false;
+        }
+      }
+
+      let canWithdraw = false;
+      try {
+        canWithdraw = await vault.canWithdraw();
+      } catch {
+        canWithdraw = false;
+      }
+
+      results.push({
+        address: addr.toLowerCase(),
+        assetLabel,
+        lockToken: lockTokenLower,
+        primaryQuoteToken: primaryQuoteToken.toLowerCase(),
+        backupQuoteToken:  backupQuoteToken.toLowerCase(),
+        primaryPair:       primaryPair.toLowerCase(),
+        backupPair:        backupPair.toLowerCase(),
+        primaryLockTokenIsToken0,
+        backupLockTokenIsToken0,
+        isNative,
+        threshold,
+        unlockTime: unlockTime.toNumber(),
+        startTime:  startTime.toNumber(),
+        withdrawn,
+        balanceBN,
+        chosenPriceBN,
+        primaryValid,
+        primaryPriceBN,
+        primaryQuoteResBN,
+        backupValid,
+        backupPriceBN,
+        backupQuoteResBN,
+        usedPrimary,
+        usedBackup,
+        priceValid,
+        lockDecimals,
+        primaryQuoteDecimals,
+        backupQuoteDecimals,
+        canWithdraw
+      });
 
     } catch (err) {
       console.error("Vault load error:", addr, err);
@@ -670,9 +669,9 @@ function renderLocks() {
       `;
     }
 
-    const assetLabel = lock.assetLabel;
-    const addrFull   = lock.address;
-    const collapsedClass = isCollapsed(addrFull) ? "collapsed" : "";
+    const assetLabel   = lock.assetLabel;
+    const addrFull     = lock.address;
+    const collapsedCls = isCollapsed(addrFull) ? "collapsed" : "";
 
     // Prices
     const thresholdFloat = parseFloat(
@@ -748,75 +747,66 @@ function renderLocks() {
 
     // Render card
     return `
-      <div class="card vault-card ${collapsedClass} ${canWithdraw ? 'vault-unlockable' : ''}" data-addr="${addrFull}">
+      <div class="card vault-card ${collapsedCls} ${canWithdraw ? 'vault-unlockable' : ''}" data-addr="${addrFull}">
 
         <!-- ROW 1: HEADER -->
         <div class="vault-header">
-        
           <div class="vault-header-left">
             <span class="vault-asset-label">${assetLabel} VAULT</span>
             ${status}
           </div>
-        
-          <div class="vault-header-spacer"></div>
-        
-          <div class="vault-header-right">
-            <div class="vault-header-actions">
-              <input class="mono"
-                value="${addrFull}"
-                readonly
-                style="
-                  background:var(--input-bg);
-                  color:#a5b4fc;
-                  border:1px solid var(--input-border);
-                  min-width:260px;
-                  max-width:360px;
-                  padding:3px 4px;
-                  border-radius:6px;
-                " />
-          
-              <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
-                <!-- copy SVG -->
-                <svg viewBox="0 0 24 24">
-                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
-                           0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
-                           2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
-                           16H8V7h11v14z"/>
-                </svg>
-              </div>
-          
-              <!-- NEW: Minimize always sits here -->
-              <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▾ Min</button>
-          
-              <!-- NEW: Maximize appears in same place -->
-              <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">⬆ Max</button>
+
+          <div style="flex:1 1 auto;"></div>
+
+          <div class="vault-header-actions">
+            <input class="mono"
+              value="${addrFull}"
+              readonly
+              style="
+                background:var(--input-bg);
+                color:#a5b4fc;
+                border:1px solid var(--input-border);
+                min-width:260px;
+                max-width:360px;
+                padding:3px 4px;
+                border-radius:6px;
+              " />
+
+            <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
+                         0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                         2-.9 2-2-2V7c0-1.1-.9-2-2-2zm0 
+                         16H8V7h11v14z"/>
+              </svg>
             </div>
+
+            <!-- Minimize ▲ (visible when expanded), Maximize ▼ (visible when collapsed) -->
+            <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▲ Min</button>
+            <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">▼ Max</button>
           </div>
-
-        
         </div>
-
 
         <!-- BODY: 5 columns -->
         <div class="vault-body">
 
-          <!-- COL 1: main info (label/value) -->
+          <!-- COL 1: main info text (aligned colons, bold values) -->
           <div class="vault-col-main">
             <div class="col1-line">
-              <div class="col1-label">target:</div>
-              <div class="col1-value">1 ${assetLabel} ≥ $${formatLockPrice(thresholdFloat)}</div>
+              target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+              &nbsp;<span class="col1-value-bold">1 ${assetLabel} ≥ $${formatLockPrice(thresholdFloat)}</span>
             </div>
             <div class="col1-line">
-              <div class="col1-label">current:</div>
-              <div class="col1-value">$${formatLockPrice(currentPriceFloat)}</div>
+              current&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+              &nbsp;<span class="col1-value-bold">$${formatLockPrice(currentPriceFloat)}</span>
             </div>
             <div class="col1-line">
-              <div class="col1-label">time unlock:</div>
-              <div class="col1-value">${formatTimestamp(lock.unlockTime)}</div>
+              time&nbsp;unlock&nbsp;:
+              &nbsp;<span class="col1-value-bold">${formatTimestamp(lock.unlockTime)}</span>
             </div>
             <div class="col1-line">
-              <div class="col1-label">locked:</div>
-              <div class="col1-value">${balanceFloat.toFixed(4)} ${assetLabel}</div>
+              locked&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+              &nbsp;<span class="col1-value-bold">${balanceFloat.toFixed(4)} ${assetLabel}</span>
             </div>
           </div>
 
@@ -835,25 +825,21 @@ function renderLocks() {
           <!-- COL 3: pie chart -->
           <div class="vault-col-pie">
             <div class="small" style="text-align:center;">Price goal</div>
-            <div class="price-goal-wrapper">
-              <div class="price-goal-pie"
-                   style="background:conic-gradient(#22c55e ${priceGoalPct}%, #020617 0);">
-              </div>
+            <div class="price-goal-pie"
+                 style="background:conic-gradient(#22c55e ${priceGoalPct}%, #020617 0);">
             </div>
           </div>
 
           <!-- COL 4: time progress -->
           <div class="vault-col-time">
-            <div class="small" style="text-align:left;">Time progress</div>
-            <div class="time-progress-wrapper">
-              <div class="time-progress-bar-bg">
-                <div class="time-progress-bar-fill" style="${timeBarStyle}"></div>
-              </div>
-              <div class="small">${timeLabel}</div>
+            <div class="small">Time progress</div>
+            <div class="time-progress-bar-bg">
+              <div class="time-progress-bar-fill" style="${timeBarStyle}"></div>
             </div>
+            <div class="small">${timeLabel}</div>
           </div>
 
-          <!-- COL 5: feed details + minimize -->
+          <!-- COL 5: feed details -->
           <div class="vault-col-feeds">
             <div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
@@ -865,10 +851,6 @@ function renderLocks() {
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 ${effectiveLine}
               </div>
-            </div>
-
-            <div style="margin-top:8px;display:flex;justify-content:flex-end;">
-              <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▾ Min</button>
             </div>
           </div>
 
