@@ -297,28 +297,27 @@
       white-space: nowrap;
     }
 
-    /* Column 1: main info with labeled rows */
+    /* COLUMN 1 — now uses grid to align text perfectly */
     .vault-col-main {
-      flex: 0 1 auto;            /* NO FLEX GROW */
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      display: grid;
+      grid-template-columns: auto 1fr;   /* label | value */
+      grid-auto-rows: auto;
+      column-gap: 12px;                  /* breathing room inside col 1 */
+      row-gap: 4px;
       white-space: nowrap;
     }
-    .col1-line {
-      display: flex;
-      gap: 6px;
-      align-items: baseline;
-    }
+    
     .col1-label {
       text-align: right;
-      white-space: nowrap;
       font-weight: 600;
+      white-space: nowrap;
     }
+    
     .col1-value {
       text-align: left;
       white-space: nowrap;
     }
+
 
     /* Column 2: buttons */
     .vault-col-buttons {
