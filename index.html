@@ -238,7 +238,7 @@
       100% { opacity: 0; transform: translate(-50%, -8px); }
     }
 
-    /* LOCKS CONTAINER: wide cards, single column list */
+    /* LOCKS CONTAINER */
     #locksContainer {
       display: flex;
       flex-direction: column;
@@ -281,74 +281,74 @@
       margin-bottom: 2px;
     }
 
+    /* ---------------------------- */
+    /* FIXED 5-COLUMN VAULT BODY   */
+    /* ---------------------------- */
     .vault-body {
-      display: flex;
-      flex-direction: row;
-      gap: 12px;
+      display: inline-flex;      /* CRITICAL FIX */
       align-items: flex-start;
-      margin-top: 4px;
+      gap: 12px;
+      width: 100%;
+      white-space: nowrap;
     }
 
-    /* 5 columns */
+    /* Column 1: main info with labeled rows */
     .vault-col-main {
-      flex: 2 1 260px;
-      font-size: 13px;
+      flex: 0 1 auto;            /* NO FLEX GROW */
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      white-space: nowrap;
     }
+    .col1-line {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+    }
+    .col1-label {
+      text-align: right;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .col1-value {
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    /* Column 2: buttons */
     .vault-col-buttons {
-      flex: 0 0 80px;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       gap: 6px;
     }
+
+    /* Column 3: pie chart */
     .vault-col-pie {
-      flex: 0 0 100px;
-      font-size: 11px;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      margin-top: 2px; /* top aligned with main info */
     }
+
+    /* Column 4: time progress */
     .vault-col-time {
-      flex: 0 0 140px;
-      font-size: 11px;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       gap: 4px;
-      margin-top: 2px;
     }
+
+    /* Column 5: feeds */
     .vault-col-feeds {
-      flex: 1 1 200px;
-      font-size: 11px;
-      color: var(--subtext);
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       min-width: 200px;
-    }
-
-    .col1-line {
-      display: flex;
-      gap: 4px;
-      align-items: baseline;
-    }
-    .col1-label {
       white-space: nowrap;
-      text-align: right;
-      font-weight: 600;
-    }
-    .col1-value {
-      flex: 1;
-      text-align: left;
-    }
-
-    .price-goal-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 4px;
     }
 
     .price-goal-pie {
@@ -359,9 +359,6 @@
       border: 1px solid #000000;
     }
 
-    .time-progress-wrapper {
-      width: 100%;
-    }
     .time-progress-bar-bg {
       width: 100%;
       height: 8px;
@@ -407,15 +404,6 @@
       .vault-body {
         flex-direction: column;
       }
-      .vault-col-buttons {
-        flex-direction: row;
-        justify-content: flex-start;
-      }
-      .vault-col-pie,
-      .vault-col-time,
-      .vault-col-feeds {
-        align-items: flex-start;
-      }
     }
   </style>
 </head>
@@ -423,7 +411,6 @@
 <body>
   <header class="header-row">
     <div class="header-left">
-      <!-- PulseChain icon exactly matching your good site (local file) -->
       <img src="PulseChainLogoTransparent.png"
            alt="PLS"
            style="height:38px;width:auto;">
@@ -525,8 +512,8 @@
     <div id="locksContainer" class="small">Connect wallet to load.</div>
   </div>
 
-  <!-- Ethers.js -->
   <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
+
 </body>
 </html>
