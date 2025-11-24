@@ -751,14 +751,19 @@ function renderLocks() {
 
         <!-- ROW 1: HEADER -->
         <div class="vault-header">
+        
+          <!-- LEFT SIDE -->
           <div class="vault-header-left">
             <span class="vault-asset-label">${assetLabel} VAULT</span>
             ${status}
           </div>
-
-          <div style="flex:1 1 auto;"></div>
-
-          <div class="vault-header-actions">
+        
+          <!-- SPACER: pushes rightgroup to align above columns 4 & 5 -->
+          <div class="vault-header-spacer"></div>
+        
+          <!-- RIGHT SIDE: address + copy + min/max aligned above columns 4 + 5 -->
+          <div class="vault-header-rightgroup">
+        
             <input class="mono"
               value="${addrFull}"
               readonly
@@ -766,26 +771,29 @@ function renderLocks() {
                 background:var(--input-bg);
                 color:#a5b4fc;
                 border:1px solid var(--input-border);
-                min-width:260px;
+                width:260px;
                 max-width:360px;
                 padding:3px 4px;
                 border-radius:6px;
-              " />
-
+              "
+            />
+        
             <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
               <svg viewBox="0 0 24 24">
-                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
-                         0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
-                         2-.9 2-2-2V7c0-1.1-.9-2-2-2zm0 
-                         16H8V7h11v14z"/>
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8
+                         c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0
+                         2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
               </svg>
             </div>
-
-            <!-- Minimize ▲ (visible when expanded), Maximize ▼ (visible when collapsed) -->
+        
+            <!-- Minimize when expanded, Maximize when collapsed-->
             <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▲ Min</button>
             <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">▼ Max</button>
+        
           </div>
-        </div>
+        
+        </div> <!-- END header row -->
+
 
         <!-- BODY: 5 columns -->
         <div class="vault-body">
