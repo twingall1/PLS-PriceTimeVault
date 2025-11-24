@@ -256,9 +256,14 @@
     .vault-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
       margin-bottom: 6px;
+    }
+    
+    /* NEW PART */
+    .vault-header-spacer {
+      flex: 1 1 auto;   /* pushes right column to the right perfectly */
+      min-width: 20px;
     }
     .vault-header-left {
       display: flex;
