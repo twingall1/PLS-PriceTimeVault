@@ -226,6 +226,23 @@
       gap: 6px;
       white-space: nowrap;
     }
+    /* Spacer that pushes the rightgroup toward columns 4 & 5 */
+    .vault-header-spacer {
+      flex: 1 1 auto;
+    }
+    
+    /* Right-side address/copy/min area that aligns above columns 4 & 5 */
+    .vault-header-rightgroup {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    
+      /* THIS IS THE KEY ALIGNMENT CONTROL */
+      max-width: 420px;       /* aligns exactly above col4 + col5 */
+      flex: 0 0 auto;
+      justify-content: flex-end;
+    }
 
     /* FIVE COLUMN BODY */
     .vault-body {
