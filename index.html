@@ -108,6 +108,7 @@
       margin-top: 4px;
       display: inline-block;
     }
+
     .status-ok { color: var(--status-ok); }
     .status-warn { color: var(--status-warn); }
     .status-bad { color: var(--status-bad); }
@@ -166,79 +167,32 @@
       align-items: flex-end;
     }
 
-    /* GRID ABOVE LOCKS */
-    .main-grid {
-      display: flex;
-      flex-wrap: wrap;
+    /* ===== 3 COLUMN MOVE ===== */
+    .three-col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
+      align-items: start;
     }
-    .grid-left {
-      flex: 1 1 320px;
+    .col-1, .col-2, .col-3 {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    .grid-right {
-      flex: 1 1 320px;
-    }
-
-    .about-columns {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 4px 16px;
-    }
-
-    .fee-note {
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--fee);
-      font-weight: 600;
-    }
-
-    /* COPY BUTTON */
-    .copy-icon-btn {
+    .about-onecol {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      background: var(--copy-bg);
-      cursor: pointer;
-    }
-    .copy-icon-btn:hover {
-      background: var(--copy-bg-hover);
-    }
-    .copy-icon-btn svg {
-      width: 14px;
-      height: 14px;
-      fill: white;
-      display: block;
-    }
-    .copy-popup {
-      position: absolute;
-      top: -18px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #111827;
-      color: #e5e7eb;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      opacity: 0;
-      pointer-events: none;
-      animation: copy-pop 0.8s ease-out forwards;
-      z-index: 5;
-    }
-    @keyframes copy-pop {
-      0% { opacity: 0; transform: translate(-50%, 0px); }
-      20% { opacity: 1; transform: translate(-50%, -4px); }
-      80% { opacity: 1; transform: translate(-50%, -4px); }
-      100% { opacity: 0; transform: translate(-50%, -8px); }
+      flex-direction: column;
+      gap: 4px;
     }
 
-    /* LOCKS CONTAINER */
+    @media (max-width: 1100px) {
+      .three-col-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* LOCKS */
+
     #locksContainer {
       display: flex;
       flex-direction: column;
@@ -252,73 +206,55 @@
       box-shadow: 0 0 16px 3px rgba(0,200,120,0.35);
       border: 1px solid #00b870 !important;
     }
-    
-    .vault-header-actions {
+
+    .vault-header {
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-    
-    /* NEW PART */
-    .vault-header-spacer {
-      flex: 1 1 auto;   /* pushes right column to the right perfectly */
-      min-width: 20px;
+      margin-bottom: 6px;
+      white-space: nowrap;
     }
     .vault-header-left {
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
-    .vault-header-right {
+    .vault-header-actions {
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
+      white-space: nowrap;
     }
 
-    .vault-asset-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--subtext);
-      margin-bottom: 2px;
-    }
-
-    /* ---------------------------- */
-    /* FIXED 5-COLUMN VAULT BODY   */
-    /* ---------------------------- */
+    /* FIVE COLUMN BODY */
     .vault-body {
       display: inline-flex;
       align-items: flex-start;
-      gap: 28px;        /* from 12px → 28px (about width of "Remove") */
+      gap: 24px; /* breathing room */
+      white-space: nowrap;
       width: 100%;
-      white-space: nowrap;
     }
 
-    /* COLUMN 1 — now uses grid to align text perfectly */
+    /* Column 1 (restored text) */
     .vault-col-main {
-      display: grid;
-      grid-template-columns: auto 1fr;   /* label | value */
-      grid-auto-rows: auto;
-      column-gap: 12px;                  /* breathing room inside col 1 */
-      row-gap: 4px;
+      flex: 0 1 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
       white-space: nowrap;
     }
-    
-    .col1-label {
-      text-align: right;
+
+    .col1-line {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .col1-value-bold {
       font-weight: 600;
-      white-space: nowrap;
-    }
-    
-    .col1-value {
-      text-align: left;
-      white-space: nowrap;
     }
 
-
-    /* Column 2: buttons */
+    /* Column 2 (buttons) */
     .vault-col-buttons {
       flex: 0 0 auto;
       display: flex;
@@ -327,41 +263,31 @@
       gap: 6px;
     }
 
-    /* Column 3: pie chart */
+    /* Column 3 (pie) */
     .vault-col-pie {
       flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
-    }
-
-    /* Column 4: time progress */
-    .vault-col-time {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    /* Column 5: feeds */
-    .vault-col-feeds {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-width: 200px;
       white-space: nowrap;
     }
-
     .price-goal-pie {
       width: 56px;
       height: 56px;
       border-radius: 50%;
       background: #020617;
-      border: 1px solid #000000;
+      border: 1px solid #000;
     }
 
+    /* Column 4 (time) */
+    .vault-col-time {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      white-space: nowrap;
+    }
     .time-progress-bar-bg {
       width: 100%;
       height: 8px;
@@ -377,6 +303,14 @@
       transition: width 0.3s linear;
     }
 
+    /* Column 5 (feeds + min/max) */
+    .vault-col-feeds {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      min-width: 200px;
+    }
+
+    /* Buttons */
     .minimize-btn,
     .maximize-btn {
       background: var(--min-btn);
@@ -384,10 +318,6 @@
       font-size: 11px;
       padding: 4px 6px;
       border-radius: 6px;
-    }
-    .minimize-btn:hover,
-    .maximize-btn:hover {
-      background: var(--min-btn-hover);
     }
 
     .vault-card.collapsed .vault-body {
@@ -401,12 +331,6 @@
     }
     .vault-card.collapsed .maximize-btn {
       display: inline-flex;
-    }
-
-    @media (max-width: 900px) {
-      .vault-body {
-        flex-direction: column;
-      }
     }
   </style>
 </head>
@@ -435,29 +359,13 @@
     </div>
   </header>
 
-  <div class="card">
-    <h2>About This App</h2>
-    <div class="about-columns small">
-      <div>
-        • Create <b>immutable vaults</b> for PLS, pDAI, or HEX.<br>
-        • Your tokens are locked until the <b>USD price</b> crosses your threshold
-          or the <b>time unlock</b> is reached.<br>
-        • Prices are derived from PulseX pools (PLS/DAI, pDAI/DAI, HEX/USDC+DAI).<br>
-        • Vault logic is fully on-chain and non-upgradeable.
-      </div>
-      <div>
-        • Thresholds are always <b>USD × 1e18 per 1 token</b>.<br>
-        • Time-based unlock works even if price feeds fail.<br>
-        • Vault addresses are stored only in your browser local storage.<br>
-        <div class="fee-note">
-          ⚠ A 0.5% fee is charged on successful withdrawal.
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="main-grid">
-    <div class="grid-left">
+  <!-- === THREE COLUMN LAYOUT === -->
+  <div class="three-col-grid">
+
+    <!-- COLUMN 1 -->
+    <div class="col-1">
+
       <div class="card">
         <h2>Create New Lock</h2>
         <form id="createForm">
@@ -482,25 +390,28 @@
 
       <div class="card">
         <h2>Add Vault Address Manually</h2>
-        <div class="small" style="margin-bottom:6px;">
-          Paste any supported vault address (created by this factory) to add it to your list.
+        <div class="small">
+          Paste any supported vault address created by this factory.
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
           <input id="manualVaultInput" type="text" placeholder="0x..."
                  style="flex:1 1 220px;min-width:200px;" />
           <button id="addVaultBtn">Add</button>
         </div>
         <div id="manualAddStatus" class="small"></div>
       </div>
+
     </div>
 
-    <div class="grid-right">
+
+    <!-- COLUMN 2 -->
+    <div class="col-2">
       <div class="card">
         <h2>Global Price Feed</h2>
         <div class="small" style="margin-bottom:6px;">
           Source: PulseX <b>pools</b> for the selected asset.<br>
-          Each asset uses a <b>primary</b> and a <b>backup</b> feed.<br>
-          Feeds are chosen by <b>USD-normalized liquidity</b>.<br>
+          Each asset uses a <b>primary</b> &amp; <b>backup</b> feed.<br>
+          Feeds chosen by <b>USD-normalized liquidity</b>.<br>
           Pair address:<br>
           <span id="pairAddress" class="mono"></span>
         </div>
@@ -508,7 +419,30 @@
         <div id="globalPriceRaw" class="small"></div>
       </div>
     </div>
+
+
+    <!-- COLUMN 3 -->
+    <div class="col-3">
+      <div class="card">
+        <h2>About This App</h2>
+        <div class="small about-onecol">
+          • Create <b>immutable vaults</b> for PLS, pDAI, or HEX.<br>
+          • Tokens lock until your <b>USD price</b> target OR time unlock.<br>
+          • Feeds from PulseX pools (PLS/DAI, pDAI/DAI, HEX/USDC+DAI).<br>
+          • Contract logic lives fully on-chain (no admin keys).<br>
+          • Thresholds are <b>USD × 1e18</b> per 1 token.<br>
+          • Time unlock always works even if feeds fail.<br>
+          • Vault addresses stored only in local storage.<br>
+          <div class="fee-note">
+            ⚠ A 0.5% fee is charged on successful withdrawal.
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+  <!-- === END GRID === -->
+
 
   <div class="card">
     <h2>Your Locks</h2>
